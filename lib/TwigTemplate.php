@@ -43,6 +43,6 @@ class TwigTemplate extends AbstractTemplate{
     protected function doRender( array $tplInputs, array $components )
     {
         $rendered = $this->twig->render( $this->templateString, ['inputs'=>$tplInputs, 'components'=>$components] );
-        return $rendered;
+        return new ViewComponentResponse( "text/html", $rendered );
     }
 }

@@ -173,7 +173,7 @@ abstract class AbstractViewComponent
     }
 
     /**
-     * Entry point for building or updating a tree. Call before render().
+     * Entry point for building or updating a tree. Call before render() when instantiating the component tree.
      * @param $inputs
      * @throws \Exception
      */
@@ -228,7 +228,7 @@ abstract class AbstractViewComponent
      * @throws \Exception
      * @return ViewComponentResponse
      */
-    public function exec( $methodName, array $inputs )
+    public function exec( $methodName, array $inputs = null )
     {
         if (! is_array( $methodName )) {
             $methodName = explode( '.', $methodName );

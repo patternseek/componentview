@@ -33,6 +33,7 @@ class AbstractViewComponentTest extends \PHPUnit_Framework_TestCase {
                 'doubleRequired'=>1.1,
                 'floatRequired'=>1.2,
                 'stringRequired'=>'string',
+                'name'=>'someone',
                 'arrayRequired'=>[],
                 'objectRequired'=>new SomeClass(),
                 'resourceRequired'=>fopen( "/tmp", 'r' ),
@@ -51,13 +52,85 @@ class AbstractViewComponentTest extends \PHPUnit_Framework_TestCase {
 #        $defrosted = unserialize( $frozen );
 #        print_r( $defrosted );
 
-        $expected = "Hello World. An int input: 1";
+        $expected = "Hello World. From: someone";
         $outStr = str_replace(' ', '', $outObj->content);
 #echo "hihi\n\n".$outStr;
         $expected = str_replace(' ', '', $expected);
         $this->assertEquals( $expected, $outStr );
 
     }
+
+    function testNestedExecJSON(){
+
+        // Optional off
+        $inputs =
+            [
+                'anyTypeRequired'=>1,
+                'anyTypeRequired2'=>2,
+                #'anyTypeOptional'=>,
+                'boolRequired'=>true,
+                'boolRequired2'=>false,
+                #'intOptional'=>3,
+                'intRequired'=>4,
+                'doubleRequired'=>1.1,
+                'floatRequired'=>1.2,
+                'stringRequired'=>'string',
+                'name'=>'someone',
+                'arrayRequired'=>[],
+                'objectRequired'=>new SomeClass(),
+                'resourceRequired'=>fopen( "/tmp", 'r' ),
+                'callableRequired'=>function(){},
+                'SomeClassRequired'=>new SomeClass()
+                #'SomeClassOptional'=>,
+                #'SomeClassWithPrebuiltDefault'=>,
+            ];
+        $view = new HelloViewComponent();
+        $view->update( $inputs );
+        $outObj = $view->render( "world.jsonMultiply", ['multiplier'=>3] ); // Multiplies multiplier * inputs['intRequired']
+        $expected = json_encode( ['result'=>12 ] );
+        $this->assertEquals( $expected, $outObj->content );
+    }
+
+    function testNestedSetAndGetStateExec(){
+        // Optional off
+        $inputs =
+            [
+                'anyTypeRequired'=>1,
+                'anyTypeRequired2'=>2,
+                #'anyTypeOptional'=>,
+                'boolRequired'=>true,
+                'boolRequired2'=>false,
+                #'intOptional'=>3,
+                'intRequired'=>4,
+                'doubleRequired'=>1.1,
+                'floatRequired'=>1.2,
+                'stringRequired'=>'string',
+                'name'=>'someone',
+                'arrayRequired'=>[],
+                'objectRequired'=>new SomeClass(),
+                'resourceRequired'=>fopen( "/tmp", 'r' ),
+                'callableRequired'=>function(){},
+                'SomeClassRequired'=>new SomeClass()
+                #'SomeClassOptional'=>,
+                #'SomeClassWithPrebuiltDefault'=>,
+            ];
+        $view = new HelloViewComponent();
+        $view->update( $inputs );
+        $outObj = $view->render( "world.setState", ['something'=>5] ); // Multiplies multiplier * inputs['intRequired']
+        $this->assertEquals( "OK", $outObj->content );
+        $viewSer = serialize( $view );
+        // Next page
+        $view = unserialize( $viewSer );
+        $view->update( $inputs );
+        $outObj = $view->render( "world.getState" ); // Multiplies multiplier * inputs['intRequired']
+        $this->assertEquals( 5, $outObj->content );
+    }
+
+    function testNestedGetStateExec(){
+
+    }
+
+
 
     function testUpdate(){
 
@@ -74,6 +147,7 @@ class AbstractViewComponentTest extends \PHPUnit_Framework_TestCase {
                 'doubleRequired'=>1.1,
                 'floatRequired'=>1.2,
                 'stringRequired'=>'string',
+                'name'=>'someone',
                 'arrayRequired'=>[],
                 'objectRequired'=>new SomeClass(),
                 'resourceRequired'=>fopen( "/tmp", 'r' ),
@@ -98,6 +172,7 @@ class AbstractViewComponentTest extends \PHPUnit_Framework_TestCase {
                 'doubleRequired'=>1.1,
                 'floatRequired'=>1.2,
                 'stringRequired'=>'string',
+                'name'=>'someone',
                 'arrayRequired'=>[],
                 'objectRequired'=>new SomeClass(),
                 'resourceRequired'=>fopen( "/tmp", 'r' ),
@@ -124,6 +199,7 @@ class AbstractViewComponentTest extends \PHPUnit_Framework_TestCase {
                  'doubleRequired'=>1.1,
                  'floatRequired'=>1.2,
                  'stringRequired'=>'string',
+                 'name'=>'someone',
                  'arrayRequired'=>[],
                  'objectRequired'=>new SomeClass(),
                  'resourceRequired'=>fopen( "/tmp", 'r' ),
@@ -146,6 +222,7 @@ class AbstractViewComponentTest extends \PHPUnit_Framework_TestCase {
                  'doubleRequired'=>1.1,
                  'floatRequired'=>1.2,
                  'stringRequired'=>'string',
+                 'name'=>'someone',
                  'arrayRequired'=>[],
                  'objectRequired'=>new SomeClass(),
                  'resourceRequired'=>fopen( "/tmp", 'r' ),
@@ -168,6 +245,7 @@ class AbstractViewComponentTest extends \PHPUnit_Framework_TestCase {
                  'doubleRequired'=>1.1,
                  'floatRequired'=>1.2,
                  'stringRequired'=>'string',
+                 'name'=>'someone',
                  'arrayRequired'=>[],
                  'objectRequired'=>new SomeClass(),
                  'resourceRequired'=>fopen( "/tmp", 'r' ),
@@ -190,6 +268,7 @@ class AbstractViewComponentTest extends \PHPUnit_Framework_TestCase {
                  'doubleRequired'=>1.1,
                  'floatRequired'=>1.2,
                  'stringRequired'=>'string',
+                 'name'=>'someone',
                  'arrayRequired'=>[],
                  'objectRequired'=>new SomeClass(),
                  'resourceRequired'=>fopen( "/tmp", 'r' ),
@@ -212,6 +291,7 @@ class AbstractViewComponentTest extends \PHPUnit_Framework_TestCase {
                  'doubleRequired'=>1.1,
                  'floatRequired'=>1.2,
                  'stringRequired'=>'string',
+                 'name'=>'someone',
                  'arrayRequired'=>[],
                  'objectRequired'=>new SomeClass(),
                  'resourceRequired'=>fopen( "/tmp", 'r' ),
@@ -234,6 +314,7 @@ class AbstractViewComponentTest extends \PHPUnit_Framework_TestCase {
                  'doubleRequired'=>1.1,
                  'floatRequired'=>1.2,
                  'stringRequired'=>'string',
+                 'name'=>'someone',
                  'arrayRequired'=>[],
                  'objectRequired'=>new SomeClass(),
                  'resourceRequired'=>fopen( "/tmp", 'r' ),
@@ -256,6 +337,7 @@ class AbstractViewComponentTest extends \PHPUnit_Framework_TestCase {
                  'doubleRequired'=>1.1,
                  'floatRequired'=>1.2,
                  'stringRequired'=>'string',
+                 'name'=>'someone',
                  'arrayRequired'=>[],
                  'objectRequired'=>new SomeClass(),
                  'resourceRequired'=>fopen( "/tmp", 'r' ),
@@ -278,6 +360,7 @@ class AbstractViewComponentTest extends \PHPUnit_Framework_TestCase {
                  'doubleRequired'=>1.1,
                  'floatRequired'=>1.2,
                  'stringRequired'=>'string',
+                 'name'=>'someone',
                  'arrayRequired'=>[],
                  'objectRequired'=>new SomeClass(),
                  'resourceRequired'=>fopen( "/tmp", 'r' ),
@@ -300,6 +383,7 @@ class AbstractViewComponentTest extends \PHPUnit_Framework_TestCase {
                  #'doubleRequired'=>1.1, //
                  'floatRequired'=>1.2,
                  'stringRequired'=>'string',
+                 'name'=>'someone',
                  'arrayRequired'=>[],
                  'objectRequired'=>new SomeClass(),
                  'resourceRequired'=>fopen( "/tmp", 'r' ),
@@ -322,6 +406,7 @@ class AbstractViewComponentTest extends \PHPUnit_Framework_TestCase {
                  'doubleRequired'=>1, //
                  'floatRequired'=>1.2,
                  'stringRequired'=>'string',
+                 'name'=>'someone',
                  'arrayRequired'=>[],
                  'objectRequired'=>new SomeClass(),
                  'resourceRequired'=>fopen( "/tmp", 'r' ),
@@ -344,6 +429,7 @@ class AbstractViewComponentTest extends \PHPUnit_Framework_TestCase {
                  'doubleRequired'=>1.1,
                  #'floatRequired'=>1.2, //
                  'stringRequired'=>'string',
+                 'name'=>'someone',
                  'arrayRequired'=>[],
                  'objectRequired'=>new SomeClass(),
                  'resourceRequired'=>fopen( "/tmp", 'r' ),
@@ -366,6 +452,7 @@ class AbstractViewComponentTest extends \PHPUnit_Framework_TestCase {
                  'doubleRequired'=>1.1,
                  'floatRequired'=>"hi", //
                  'stringRequired'=>'string',
+                 'name'=>'someone',
                  'arrayRequired'=>[],
                  'objectRequired'=>new SomeClass(),
                  'resourceRequired'=>fopen( "/tmp", 'r' ),
@@ -388,6 +475,7 @@ class AbstractViewComponentTest extends \PHPUnit_Framework_TestCase {
                  'doubleRequired'=>1.1,
                  'floatRequired'=>1.2,
                  #'stringRequired'=>'string', //
+                 'name'=>'someone',
                  'arrayRequired'=>[],
                  'objectRequired'=>new SomeClass(),
                  'resourceRequired'=>fopen( "/tmp", 'r' ),
@@ -410,6 +498,7 @@ class AbstractViewComponentTest extends \PHPUnit_Framework_TestCase {
                  'doubleRequired'=>1.1,
                  'floatRequired'=>1.2,
                  'stringRequired'=>1, //
+                 'name'=>'someone',
                  'arrayRequired'=>[],
                  'objectRequired'=>new SomeClass(),
                  'resourceRequired'=>fopen( "/tmp", 'r' ),
@@ -432,6 +521,7 @@ class AbstractViewComponentTest extends \PHPUnit_Framework_TestCase {
                  'doubleRequired'=>1.1,
                  'floatRequired'=>1.2,
                  'stringRequired'=>'string',
+                 'name'=>'someone',
                  #'arrayRequired'=>[], //
                  'objectRequired'=>new SomeClass(),
                  'resourceRequired'=>fopen( "/tmp", 'r' ),
@@ -454,6 +544,7 @@ class AbstractViewComponentTest extends \PHPUnit_Framework_TestCase {
                  'doubleRequired'=>1.1,
                  'floatRequired'=>1.2,
                  'stringRequired'=>'string',
+                 'name'=>'someone',
                  'arrayRequired'=>"1", //
                  'objectRequired'=>new SomeClass(),
                  'resourceRequired'=>fopen( "/tmp", 'r' ),
@@ -476,6 +567,7 @@ class AbstractViewComponentTest extends \PHPUnit_Framework_TestCase {
                  'doubleRequired'=>1.1,
                  'floatRequired'=>1.2,
                  'stringRequired'=>'string',
+                 'name'=>'someone',
                  'arrayRequired'=>[],
                  #'objectRequired'=>new SomeClass(), //
                  'resourceRequired'=>fopen( "/tmp", 'r' ),
@@ -498,6 +590,7 @@ class AbstractViewComponentTest extends \PHPUnit_Framework_TestCase {
                  'doubleRequired'=>1.1,
                  'floatRequired'=>1.2,
                  'stringRequired'=>'string',
+                 'name'=>'someone',
                  'arrayRequired'=>[],
                  'objectRequired'=>FALSE, //
                  'resourceRequired'=>fopen( "/tmp", 'r' ),
@@ -520,6 +613,7 @@ class AbstractViewComponentTest extends \PHPUnit_Framework_TestCase {
                  'doubleRequired'=>1.1,
                  'floatRequired'=>1.2,
                  'stringRequired'=>'string',
+                 'name'=>'someone',
                  'arrayRequired'=>[],
                  'objectRequired'=>new SomeClass(),
                  #'resourceRequired'=>fopen( "/tmp", 'r' ), //
@@ -542,6 +636,7 @@ class AbstractViewComponentTest extends \PHPUnit_Framework_TestCase {
                  'doubleRequired'=>1.1,
                  'floatRequired'=>1.2,
                  'stringRequired'=>'string',
+                 'name'=>'someone',
                  'arrayRequired'=>[],
                  'objectRequired'=>new SomeClass(),
                  'resourceRequired'=>"hi", //
@@ -564,6 +659,7 @@ class AbstractViewComponentTest extends \PHPUnit_Framework_TestCase {
                  'doubleRequired'=>1.1,
                  'floatRequired'=>1.2,
                  'stringRequired'=>'string',
+                 'name'=>'someone',
                  'arrayRequired'=>[],
                  'objectRequired'=>new SomeClass(),
                  'resourceRequired'=>fopen( "/tmp", 'r' ),
@@ -586,6 +682,7 @@ class AbstractViewComponentTest extends \PHPUnit_Framework_TestCase {
                  'doubleRequired'=>1.1,
                  'floatRequired'=>1.2,
                  'stringRequired'=>'string',
+                 'name'=>'someone',
                  'arrayRequired'=>[],
                  'objectRequired'=>new SomeClass(),
                  'resourceRequired'=>fopen( "/tmp", 'r' ),
@@ -608,6 +705,7 @@ class AbstractViewComponentTest extends \PHPUnit_Framework_TestCase {
                  'doubleRequired'=>1.1,
                  'floatRequired'=>1.2,
                  'stringRequired'=>'string',
+                 'name'=>'someone',
                  'arrayRequired'=>[],
                  'objectRequired'=>new SomeClass(),
                  'resourceRequired'=>fopen( "/tmp", 'r' ),
@@ -630,6 +728,7 @@ class AbstractViewComponentTest extends \PHPUnit_Framework_TestCase {
                  'doubleRequired'=>1.1,
                  'floatRequired'=>1.2,
                  'stringRequired'=>'string',
+                 'name'=>'someone',
                  'arrayRequired'=>[],
                  'objectRequired'=>new SomeClass(),
                  'resourceRequired'=>fopen( "/tmp", 'r' ),
@@ -652,6 +751,7 @@ class AbstractViewComponentTest extends \PHPUnit_Framework_TestCase {
                  'doubleRequired'=>1.1,
                  'floatRequired'=>1.2,
                  'stringRequired'=>'string',
+                 'name'=>'someone',
                  'arrayRequired'=>[],
                  'objectRequired'=>new SomeClass(),
                  'resourceRequired'=>fopen( "/tmp", 'r' ),
@@ -674,6 +774,7 @@ class AbstractViewComponentTest extends \PHPUnit_Framework_TestCase {
                  'doubleRequired'=>1.1,
                  'floatRequired'=>1.2,
                  'stringRequired'=>'string',
+                 'name'=>'someone',
                  'arrayRequired'=>[],
                  'objectRequired'=>new SomeClass(),
                  'resourceRequired'=>fopen( "/tmp", 'r' ),
