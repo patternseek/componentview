@@ -10,8 +10,8 @@ post=
 	e=menu.something.change
 	something=whatever
 $v = $_GET['v'];
-include $v.php
-// URL params ($_GET) are always used for 'inputs' to a view
+'include' $v.php // not a straight include of course, validate v
+// URL params ($_GET) are always used for 'props' for a view
 if( ! ( $view = Session::fetch( 'views.{$v}' ) ) ){
 	$view = new $v();
 }
@@ -32,7 +32,7 @@ Session::instance()->set( 'views.{$v}', $view );
  * (c) 2014 Tolan Blundell <tolan@patternseek.net>
  *
  * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
+  * file that was distributed with this source code.
  */
 
 namespace PatternSeek\ComponentView;
@@ -72,9 +72,9 @@ abstract class AbstractViewComponent
     protected $state = [ ];
 
     /**
-     * @var array An array of named input elements for this component's template
+     * @var array An array of named properties for this component's template
      */
-    protected $templateInputs = null;
+    protected $templateProps = null;
 
 
     /**
@@ -117,11 +117,11 @@ abstract class AbstractViewComponent
     }
 
     /**
-     * Using $inputs and state, optionally update state, optionally create child components via addOrUpdateChild(), return template inputs
-     * @param array $inputs
-     * @return array Template inputs
+     * Using $props and $this->state, optionally update state, optionally create child components via addOrUpdateChild(), return template props
+     * @param array $props
+     * @return array Template props
      */
-    abstract protected function doUpdate( array $inputs );
+    abstract protected function doUpdate( array $props );
 
     /**
      * Load or configure the component's template as necessary
@@ -149,38 +149,38 @@ abstract class AbstractViewComponent
     /**
      * Entry point for rendering a component tree. Call update() first.
      * @param string|null $execMethodName An optional method on this or a subcomponent to execute before rendering
-     * @param array|null $execInputs
+     * @param array|null $execArgs
      * @throws \Exception
      * @return ViewComponentResponse
      */
-    public function render( $execMethodName = null, array $execInputs = null )
+    public function render( $execMethodName = null, array $execArgs = null )
     {
-        if( null === $this->templateInputs ){
+        if( null === $this->templateProps ){
             throw new \Exception( "AbstractComponentView::update() must be called before render()");
         }
         // If we're called with an 'exec' then run it instead of rendering the whole tree.
         // It may still render the whole tree or it may just render a portion or just return JSON
         if( null !== $execMethodName ){
-            $out = $this->exec( $execMethodName, $execInputs );
+            $out = $this->exec( $execMethodName, $execArgs );
         }else{
-            $out = $this->template->render( $this->templateInputs, $this->childComponents );
+            $out = $this->template->render( $this->templateProps, $this->childComponents );
             if( ! ( $out instanceof ViewComponentResponse ) ){
                 throw new \Exception( get_class($this->template)." returned invalid response. Should have been an instance of ViewComponentResponse" );
             }
         }
-        $this->templateInputs = null;
+        $this->templateProps = null;
         return $out;
     }
 
     /**
      * Entry point for building or updating a tree. Call before render() when instantiating the component tree.
-     * @param $inputs
+     * @param $props
      * @throws \Exception
      */
-    public function update( $inputs )
+    public function update( $props )
     {
         // doUpdate() creates/updates children via addOrUpdateChild()
-        $this->templateInputs = $this->doUpdate( $inputs );
+        $this->templateProps = $this->doUpdate( $props );
         // Prune children no longer in use
         foreach ( array_keys( $this->childComponents ) as $handle) {
             if (! $this->updatedChildren[$handle]) {
@@ -206,15 +206,15 @@ abstract class AbstractViewComponent
      *
      * @param string $handle
      * @param string $type
-     * @param array $inputs
+     * @param array $props
      * @return AbstractViewComponent
      */
-    public function addOrUpdateChild( $handle, $type, $inputs )
+    public function addOrUpdateChild( $handle, $type, $props )
     {
         if (! $this->childComponents[$handle]) {
             $this->childComponents[$handle] = new $type( $handle, $this );
         }
-        $this->childComponents[$handle]->update( $inputs );
+        $this->childComponents[$handle]->update( $props );
         $this->updatedChildren[$handle] = true;
         return $this->childComponents[$handle];
     }
@@ -224,23 +224,23 @@ abstract class AbstractViewComponent
      * Execute a component method within the page or component.
      * Called first on a top level component which then passes the call down to the appropriate sub-component (or executes on itself if appropriate).
      * @param array|string $methodName A methodname in the format subComponent.anotherSubComponent.methodName. Either dotted string as described, or parts in an array. The top level page component shouldn't be included
-     * @param array $inputs
+     * @param array $args
      * @throws \Exception
      * @return ViewComponentResponse
      */
-    public function exec( $methodName, array $inputs = null )
+    public function exec( $methodName, array $args = null )
     {
         if (! is_array( $methodName )) {
             $methodName = explode( '.', $methodName );
         }
         if (count( $methodName ) == 1) {
             $methodName = $methodName[0] . 'Handler';
-            $out = $this->$methodName( $inputs );
+            $out = $this->$methodName( $args );
         } else {
             $childName = array_shift( $methodName );
             $child = $this->childComponents[$childName];
             if ($child instanceof AbstractViewComponent) {
-                $out = $child->exec( $methodName, $inputs );
+                $out = $child->exec( $methodName, $args );
             }else{
                 throw new \Exception( implode(".", $methodName )." is not a valid method." );
             }
@@ -252,8 +252,8 @@ abstract class AbstractViewComponent
     }
 
     /**
-     * testInputs() compares a set of named inputs in the associative array $this->inputs with an input specification.
-     * It MUST be used by implementations' update() and *Handler() methods to verify their input.
+     * testInputs() compares a set of named inputs (props or args) in the associative array $inputs with an input specification.
+     * It MUST be used by implementations' doUpdate() and *Handler() methods to verify their input.
      *
      * $inputSpec is an array describing allowed inputs with a similar design to php method sigs.
      * The keys are field names, the values are 0 to 2 entry arrays with the following entries: [type,default].

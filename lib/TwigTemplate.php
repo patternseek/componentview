@@ -19,6 +19,9 @@ class TwigTemplate extends AbstractTemplate{
      * @var Twig_Environment
      */
     protected $twig;
+    /**
+     * @var string A Twig template
+     */
     protected $templateString;
 
     public function __construct( AbstractViewComponent $component, $templateString ){
@@ -36,13 +39,13 @@ class TwigTemplate extends AbstractTemplate{
     }
 
     /**
-     * @param array $tplInputs
+     * @param array $props
      * @param \PatternSeek\ComponentView\AbstractViewComponent[] $components
      * @return string
      */
-    protected function doRender( array $tplInputs, array $components )
+    protected function doRender( array $props, array $components )
     {
-        $rendered = $this->twig->render( $this->templateString, ['inputs'=>$tplInputs, 'components'=>$components] );
+        $rendered = $this->twig->render( $this->templateString, ['props'=>$props, 'components'=>$components] );
         return new ViewComponentResponse( "text/html", $rendered );
     }
 }

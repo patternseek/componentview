@@ -29,11 +29,11 @@ abstract class AbstractTemplate{
     protected $component;
 
     /**
-     * @param array $tplInputs
+     * @param array $props
      * @param AbstractViewComponent[] $components
      * @return string
      */
-    abstract protected function doRender( array $tplInputs, array $components );
+    abstract protected function doRender( array $props, array $components );
 
     /**
      * @param AbstractViewComponent $component
@@ -44,13 +44,13 @@ abstract class AbstractTemplate{
 
     /**
      *
-     * @param array $inputs
+     * @param array $props
      * @param AbstractViewComponent[] $components
      * @return string
      */
-    public function render( array $inputs, array $components ){
-        $inputs['_this'] = $this;
-        return $this->doRender( $inputs, $components );
+    public function render( array $props, array $components ){
+        $props['_this'] = $this;
+        return $this->doRender( $props, $components );
     }
 
     //public function execGET

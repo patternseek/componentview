@@ -21,7 +21,7 @@ class AbstractViewComponentTest extends \PHPUnit_Framework_TestCase {
     function testRender(){
 
         // Optional off
-        $inputs =
+        $props =
             [
                 'anyTypeRequired'=>1,
                 'anyTypeRequired2'=>2,
@@ -43,7 +43,7 @@ class AbstractViewComponentTest extends \PHPUnit_Framework_TestCase {
                 #'SomeClassWithPrebuiltDefault'=>,
             ];
         $view = new HelloViewComponent();
-        $view->update( $inputs );
+        $view->update( $props );
         $outObj = $view->render();
 
 #        print_r( $out );
@@ -63,7 +63,7 @@ class AbstractViewComponentTest extends \PHPUnit_Framework_TestCase {
     function testNestedExecJSON(){
 
         // Optional off
-        $inputs =
+        $props =
             [
                 'anyTypeRequired'=>1,
                 'anyTypeRequired2'=>2,
@@ -85,15 +85,15 @@ class AbstractViewComponentTest extends \PHPUnit_Framework_TestCase {
                 #'SomeClassWithPrebuiltDefault'=>,
             ];
         $view = new HelloViewComponent();
-        $view->update( $inputs );
-        $outObj = $view->render( "world.jsonMultiply", ['multiplier'=>3] ); // Multiplies multiplier * inputs['intRequired']
+        $view->update( $props );
+        $outObj = $view->render( "world.jsonMultiply", ['multiplier'=>3] ); // Multiplies multiplier * props['intRequired']
         $expected = json_encode( ['result'=>12 ] );
         $this->assertEquals( $expected, $outObj->content );
     }
 
     function testNestedSetAndGetStateExec(){
         // Optional off
-        $inputs =
+        $props =
             [
                 'anyTypeRequired'=>1,
                 'anyTypeRequired2'=>2,
@@ -115,27 +115,21 @@ class AbstractViewComponentTest extends \PHPUnit_Framework_TestCase {
                 #'SomeClassWithPrebuiltDefault'=>,
             ];
         $view = new HelloViewComponent();
-        $view->update( $inputs );
-        $outObj = $view->render( "world.setState", ['something'=>5] ); // Multiplies multiplier * inputs['intRequired']
+        $view->update( $props );
+        $outObj = $view->render( "world.setState", ['something'=>5] ); // Multiplies multiplier * props['intRequired']
         $this->assertEquals( "OK", $outObj->content );
         $viewSer = serialize( $view );
         // Next page
         $view = unserialize( $viewSer );
-        $view->update( $inputs );
-        $outObj = $view->render( "world.getState" ); // Multiplies multiplier * inputs['intRequired']
+        $view->update( $props );
+        $outObj = $view->render( "world.getState" ); // Multiplies multiplier * props['intRequired']
         $this->assertEquals( 5, $outObj->content );
     }
-
-    function testNestedGetStateExec(){
-
-    }
-
-
 
     function testUpdate(){
 
         // Optional off
-        $inputs =
+        $props =
             [
                 'anyTypeRequired'=>1,
                 'anyTypeRequired2'=>2,
@@ -156,11 +150,11 @@ class AbstractViewComponentTest extends \PHPUnit_Framework_TestCase {
                 #'SomeClassOptional'=>,
                 #'SomeClassWithPrebuiltDefault'=>,
             ];
-        $view = new HelloViewComponent( $inputs );
-        $view->update( $inputs );
+        $view = new HelloViewComponent( $props );
+        $view->update( $props );
 
         // Optional on
-        $inputs =
+        $props =
             [
                 'anyTypeRequired'=>1,
                 'anyTypeRequired2'=>2,
@@ -181,8 +175,8 @@ class AbstractViewComponentTest extends \PHPUnit_Framework_TestCase {
                 'SomeClassOptional'=>new SomeClass(),
                 'SomeClassWithPrebuiltDefault'=>new SomeClass(),
             ];
-        $view = new HelloViewComponent( $inputs );
-        $view->update( $inputs );
+        $view = new HelloViewComponent( $props );
+        $view->update( $props );
 
 
         // Failures
@@ -787,11 +781,11 @@ class AbstractViewComponentTest extends \PHPUnit_Framework_TestCase {
 
     }
 
-    protected function failConfig( $inputs ){
+    protected function failConfig( $props ){
 
         try{
             $view = new HelloViewComponent();
-            $view->update( $inputs );
+            $view->update( $props );
         }catch ( \Exception $e ){
             $this->assertTrue( true );
             return;
