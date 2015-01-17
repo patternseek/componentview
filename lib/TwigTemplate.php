@@ -30,7 +30,7 @@ class TwigTemplate extends AbstractTemplate{
         Twig_Autoloader::register();
         $loader = new Twig_Loader_String();
         $config = ['autoescape'=>false];
-        if( defined( TWIG_CACHE_DIR ) ){
+        if( defined( "TWIG_CACHE_DIR" ) ){
             $config['cache'] = TWIG_CACHE_DIR;
         }
 
