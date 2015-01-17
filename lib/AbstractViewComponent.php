@@ -1,32 +1,5 @@
 <?php
 /*
-
-flow:
-
-Although this defines how the controller will use GET and POST, the views don't care
-
-POST /?v=MyView
-post=
-	e=menu.something.change
-	something=whatever
-$v = $_GET['v'];
-'include' $v.php // not a straight include of course, validate v
-// URL params ($_GET) are always used for 'props' for a view
-if( ! ( $view = Session::fetch( 'views.{$v}' ) ) ){
-	$view = new $v();
-}
-// $_POST is used for executing methods, which implicitly change state
-if( $_POST ){
-	$view->exec( $_POST['e'], $_POST );
-}
-// Enforce update() not changing state?
-$agileServiceManager->enforceIdempotency( true );
-$out = $view->update( $_GET );
-$agileServiceManager->enforceIdempotency( false );
-Session::instance()->set( 'views.{$v}', $view );
-
-*/
-/*
  * This file is part of the Patternseek ComponentView library.
  *
  * (c) 2014 Tolan Blundell <tolan@patternseek.net>
