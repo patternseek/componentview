@@ -45,7 +45,20 @@ class TwigTemplate extends AbstractTemplate{
      */
     protected function doRender( array $props, array $components )
     {
-        $rendered = $this->twig->render( $this->templateString, ['props'=>$props, 'components'=>$components] );
+
+        // This is defined here as this is where $components is available. It would be better in the superclass.
+        $componentRenderFunc =
+            function( $name ) use ($components){
+                return $components[$name]->render()->content;
+            };
+
+        $this->twig->addFunction('component', new \Twig_Function_Function( $this->componentRenderHelper ));
+        $this->twig->addFunction('execURL', new \Twig_Function_Function( $this->component->execURLHelper ));
+        $this->twig->addFunction('execForm', new \Twig_Function_Function( $this->component->execFormHelper ));
+
+
+        $rendered = $this->twig->render( $this->templateString, ['this'=>$this, 'props'=>$props, 'components'=>$components, 'component'=>$componentRenderFunc] );
         return new ViewComponentResponse( "text/html", $rendered );
     }
+
 }

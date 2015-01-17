@@ -104,6 +104,19 @@ abstract class AbstractViewComponent
     protected $template;
 
     /**
+     * A function that builds a URL for calling methods via exec()
+     * @var callable( @param string $execPath, @param mixed[] $args ) // This is an improvised PHPDoc format
+     */
+    public $execURLHelper;
+
+    /**
+     * A function that builds the header of a form for calling methods via exec().
+     * Templates are responsible for including the form body and </form>
+     * @var callable( @param string $execPath, @param string $method, @param string $formBody ) // This is an improvised PHPDoc format
+     */
+    public $execFormHelper;
+
+    /**
      * @param null $handle
      * @param AbstractViewComponent $parent
      */
@@ -111,7 +124,20 @@ abstract class AbstractViewComponent
     {
         // Null means we are root
         $this->parent = $parent;
+
         $this->handle = $handle;
+
+        // Defaults just cause an exception on use. Calling code should define these
+        $this->execURLHelper =
+            function( $execPath, array $args = [] ){
+                throw new \Exception( "Undefined execURLHelper" );
+            };
+
+        $this->execFormHelper =
+            function( $execPath, $method, $formBody ){
+                throw new \Exception( "Undefined execFormHelper" );
+            };
+
         $this->setupTemplate();
 
     }
@@ -173,6 +199,19 @@ abstract class AbstractViewComponent
     }
 
     /**
+     * Fetch the root component and render it
+     * @return ViewComponentResponse
+     * @throws \Exception
+     */
+    public function renderRoot(){
+        $cur = $this;
+        while( $cur->parent !== null ){
+            $cur = $cur->parent;
+        }
+        return $cur->render();
+    }
+
+    /**
      * Entry point for building or updating a tree. Call before render() when instantiating the component tree.
      * @param $props
      * @throws \Exception
@@ -214,10 +253,14 @@ abstract class AbstractViewComponent
         if (! $this->childComponents[$handle]) {
             $this->childComponents[$handle] = new $type( $handle, $this );
         }
+        $this->childComponents[$handle]->execURLHelper = $this->execURLBuilde;
+        $this->childComponents[$handle]->execFormHelper = $this->execFormHelper;
         $this->childComponents[$handle]->update( $props );
         $this->updatedChildren[$handle] = true;
         return $this->childComponents[$handle];
     }
+
+
 
 
     /**

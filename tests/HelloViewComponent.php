@@ -59,7 +59,7 @@ class HelloViewComponent extends AbstractViewComponent{
     protected function setupTemplate()
     {
         $tplTwig = <<<EOS
-{% set worldOut = components.world.render() %}Hello {{worldOut.content}}
+Hello {{component( 'world' )}}
 EOS;
 
         $this->template = new TwigTemplate( $this, $tplTwig );

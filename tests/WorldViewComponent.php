@@ -52,7 +52,7 @@ class WorldViewComponent extends AbstractViewComponent{
     protected function setupTemplate()
     {
         $tplTwig = <<<EOS
-World. From: {{inputs.name}}
+World. From: {{props.name}}
 EOS;
         $this->template = new TwigTemplate( $this, $tplTwig );
     }
