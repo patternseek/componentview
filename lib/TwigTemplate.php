@@ -52,7 +52,7 @@ class TwigTemplate extends AbstractTemplate{
                 return $components[$name]->render()->content;
             };
 
-        $this->twig->addFunction('component', new \Twig_Function_Function( $this->componentRenderHelper ));
+        $this->twig->addFunction('component', new \Twig_Function_Function( $componentRenderFunc ));
         $this->twig->addFunction('execURL', new \Twig_Function_Function( $this->component->execURLHelper ));
         $this->twig->addFunction('execForm', new \Twig_Function_Function( $this->component->execFormHelper ));
 
