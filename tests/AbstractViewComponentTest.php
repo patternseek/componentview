@@ -43,6 +43,7 @@ class AbstractViewComponentTest extends \PHPUnit_Framework_TestCase {
                 #'SomeClassWithPrebuiltDefault'=>,
             ];
         $view = new HelloViewComponent();
+        $view->execFormHelper = function(  ){  };
         $view->update( $props );
         $outObj = $view->render();
 

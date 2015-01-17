@@ -223,10 +223,10 @@ abstract class AbstractViewComponent
      */
     public function addOrUpdateChild( $handle, $type, $props )
     {
-        if (! $this->childComponents[$handle]) {
+        if (! isset( $this->childComponents[$handle] ) ) {
             $this->childComponents[$handle] = new $type( $handle, $this );
         }
-        $this->childComponents[$handle]->execURLHelper = $this->execURLBuilde;
+        $this->childComponents[$handle]->execURLHelper = $this->execURLHelper;
         $this->childComponents[$handle]->execFormHelper = $this->execFormHelper;
         $this->childComponents[$handle]->update( $props );
         $this->updatedChildren[$handle] = true;
@@ -317,11 +317,11 @@ abstract class AbstractViewComponent
             }
 
             // Check type
-            $requiredType = $fieldSpec[0];
             // Any type allowed, continue
-            if (! isset( $requiredType ) || $requiredType === null) {
+            if (! isset( $fieldSpec[0] ) || $fieldSpec[0] === null) {
                 continue;
             }
+            $requiredType = $fieldSpec[0];
             $input = $inputs[$fieldName];
             // Specific type required
             $failed = true;
