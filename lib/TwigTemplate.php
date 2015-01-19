@@ -57,7 +57,7 @@ class TwigTemplate extends AbstractTemplate{
         $this->twig->addFunction('execForm', new \Twig_Function_Function( $this->component->execFormHelper ));
 
 
-        $rendered = $this->twig->render( $this->templateString, ['this'=>$this, 'props'=>$props, 'components'=>$components, 'component'=>$componentRenderFunc] );
+        $rendered = $this->twig->render( $this->templateString, ['this'=>$this, 'props'=>$props, 'components'=>$components] );
         return new ViewComponentResponse( "text/html", $rendered );
     }
 

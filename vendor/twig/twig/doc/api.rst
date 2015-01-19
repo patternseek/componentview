@@ -94,13 +94,19 @@ The following options are available:
   replace them with a ``null`` value. When set to ``true``, Twig throws an
   exception instead (default to ``false``).
 
-* ``autoescape``: If set to ``true``, auto-escaping will be enabled by default
-  for all templates (default to ``true``). As of Twig 1.8, you can set the
-  escaping strategy to use (``html``, ``js``, ``false`` to disable).
-  As of Twig 1.9, you can set the escaping strategy to use (``css``, ``url``, 
-  ``html_attr``, or a PHP callback that takes the template "filename" and must 
+* ``autoescape``: If set to ``true``, HTML auto-escaping will be enabled by
+  default for all templates (default to ``true``).
+
+  As of Twig 1.8, you can set the escaping strategy to use (``html``, ``js``,
+  ``false`` to disable).
+
+  As of Twig 1.9, you can set the escaping strategy to use (``css``, ``url``,
+  ``html_attr``, or a PHP callback that takes the template "filename" and must
   return the escaping strategy to use -- the callback cannot be a function name
   to avoid collision with built-in escaping strategies).
+
+  As of Twig 1.17, the ``filename`` escaping strategy determines the escaping
+  strategy to use for a template based on the template filename extension.
 
 * ``optimizations``: A flag that indicates which optimizations to apply
   (default to ``-1`` -- all optimizations are enabled; set it to ``0`` to
@@ -166,21 +172,6 @@ Namespaced templates can be accessed via the special
 
     $twig->render('@admin/index.html', array());
 
-``Twig_Loader_String``
-......................
-
-``Twig_Loader_String`` loads templates from strings. It's a dummy loader as
-the template reference is the template source code::
-
-    $loader = new Twig_Loader_String();
-    $twig = new Twig_Environment($loader);
-
-    echo $twig->render('Hello {{ name }}!', array('name' => 'Fabien'));
-
-This loader should only be used for unit testing as it has severe limitations:
-several tags, like ``extends`` or ``include`` do not make sense to use as the
-reference to the template is the template source code itself.
-
 ``Twig_Loader_Array``
 .....................
 
@@ -214,7 +205,7 @@ projects where storing all templates in a single PHP file might make sense.
         'base.html' => '{% block content %}{% endblock %}',
     ));
     $loader2 = new Twig_Loader_Array(array(
-        'index.html' => '{% extends "base.twig" %}{% block content %}Hello {{ name }}{% endblock %}',
+        'index.html' => '{% extends "base.html" %}{% block content %}Hello {{ name }}{% endblock %}',
         'base.html'  => 'Will never be loaded',
     ));
 
@@ -266,26 +257,6 @@ All loaders implement the ``Twig_LoaderInterface``::
          * @param timestamp $time The last modification time of the cached template
          */
         function isFresh($name, $time);
-    }
-
-As an example, here is how the built-in ``Twig_Loader_String`` reads::
-
-    class Twig_Loader_String implements Twig_LoaderInterface
-    {
-        public function getSource($name)
-        {
-          return $name;
-        }
-
-        public function getCacheKey($name)
-        {
-          return $name;
-        }
-
-        public function isFresh($name, $time)
-        {
-          return false;
-        }
     }
 
 The ``isFresh()`` method must return ``true`` if the current cached template
