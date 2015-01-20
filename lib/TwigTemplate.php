@@ -56,7 +56,7 @@ class TwigTemplate extends AbstractTemplate{
         $this->twig->addFunction('execURL', new \Twig_Function_Function( $this->component->execURLHelper ));
         $this->twig->addFunction('execForm', new \Twig_Function_Function( $this->component->execFormHelper ));
 
-
+echo "HI";
         $rendered = $this->twig->render(
             $this->templateString,
             [
