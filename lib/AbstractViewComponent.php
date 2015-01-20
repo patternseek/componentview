@@ -155,7 +155,7 @@ abstract class AbstractViewComponent
     public function render( $execMethodName = null, array $execArgs = null )
     {
         if( null === $this->templateProps ){
-            throw new \Exception( "AbstractComponentView::update() must be called before render()");
+            throw new \Exception( "AbstractComponentView::update() must be called before render(). No template properties set for ".get_called_class());
         }
         // If we're called with an 'exec' then run it instead of rendering the whole tree.
         // It may still render the whole tree or it may just render a portion or just return JSON
@@ -209,8 +209,13 @@ abstract class AbstractViewComponent
      */
     public function getPath(){
         if( null !== $this->parent ){
-            return $this->parent->getPath().'.'.$this->handle;
+            if( null !== ($pPath = $this->parent->getPath())){
+                return $pPath.'.'.$this->handle;
+            }else{
+                return $this->handle;
+            }
         }
+        return null;
     }
 
     /**

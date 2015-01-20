@@ -49,7 +49,6 @@ abstract class AbstractTemplate{
      * @return string
      */
     public function render( array $props, array $components ){
-        $props['_this'] = $this;
         return $this->doRender( $props, $components );
     }
 
