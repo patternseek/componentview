@@ -306,7 +306,7 @@ abstract class AbstractViewComponent
      * @param array $inputs
      * @throws \Exception
      */
-    protected function testInputs( array $inputSpec, array $inputs )
+    protected function testInputs( array $inputSpec, array &$inputs )
     {
         foreach ($inputSpec as $fieldName => $fieldSpec) {
             // Required field
