@@ -5,8 +5,10 @@
  * (c) 2014 Tolan Blundell <tolan@patternseek.net>
  *
  * For the full copyright and license information, please view the LICENSE
-  * file that was distributed with this source code.
+ * file that was distributed with this source code.
  */
+
+namespace PatternSeek\ComponentView;
 
 /**
  * Class ViewComponentResponse
