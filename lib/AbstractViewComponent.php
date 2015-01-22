@@ -31,15 +31,14 @@ abstract class AbstractViewComponent
     }
 
     /**
-     * @var array An array of named state elements
+     * @var ViewState An object containing state elements
      */
-    protected $state = [ ];
+    protected $state;
 
     /**
      * @var array An array of named properties for this component's template
      */
     protected $templateProps = null;
-
 
     /**
      * @var AbstractViewComponent
@@ -103,8 +102,15 @@ abstract class AbstractViewComponent
             };
 
         $this->setupTemplate();
+        $this->initState();
 
     }
+
+    /**
+     * Initialise $this->state with either a new ViewState or an appropriate subclass
+     * @return void
+     */
+    abstract protected function initState();
 
     /**
      * Using $props and $this->state, optionally update state, optionally create child components via addOrUpdateChild(), return template props
