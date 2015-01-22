@@ -13,6 +13,10 @@ use Twig_Autoloader;
 use Twig_Environment;
 use Twig_Loader_String;
 
+/**
+ * Class TwigTemplate
+ * @package PatternSeek\ComponentView
+ */
 class TwigTemplate extends AbstractTemplate{
 
     /**
@@ -24,6 +28,10 @@ class TwigTemplate extends AbstractTemplate{
      */
     protected $templateString;
 
+    /**
+     * @param AbstractViewComponent $component
+     * @param $templateString
+     */
     public function __construct( AbstractViewComponent $component, $templateString ){
         parent::__construct( $component );
 

@@ -10,6 +10,20 @@ use PatternSeek\ComponentView\TwigTemplate;
  */
 class HelloViewComponent extends AbstractViewComponent{
 
+    /**
+     * Has the component been initialised?
+     * @return bool
+     */
+    public function getInitialised()
+    {
+        return ( isset( $this->state[ 'initialised' ] ) && ( $this->state[ 'initialised' ] === true ) );
+    }
+
+    /**
+     * Using $props and $this->state, optionally update state, optionally create child components via addOrUpdateChild(), return template props
+     * @param array $props
+     * @return array Template props
+     */
     protected function doUpdate( array $props ){
         $this->testInputs(
             [

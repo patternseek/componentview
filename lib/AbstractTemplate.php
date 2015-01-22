@@ -52,6 +52,4 @@ abstract class AbstractTemplate{
         return $this->doRender( $props, $components );
     }
 
-    //public function execGET
-
 }

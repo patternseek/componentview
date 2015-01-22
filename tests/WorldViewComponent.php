@@ -11,6 +11,20 @@ use PatternSeek\ComponentView\ViewComponentResponse;
  */
 class WorldViewComponent extends AbstractViewComponent{
 
+    /**
+     * Has the component been initialised?
+     * @return bool
+     */
+    public function getInitialised()
+    {
+        return ( isset( $this->state[ 'initialised' ] ) && ( $this->state[ 'initialised' ] === true ) );
+    }
+
+    /**
+     * Using $props and $this->state, optionally update state, optionally create child components via addOrUpdateChild(), return template props
+     * @param array $props
+     * @return array Template props
+     */
     protected function doUpdate( array $props ){
 
         $this->testInputs(
@@ -28,18 +42,32 @@ class WorldViewComponent extends AbstractViewComponent{
         return $templateInputs;
     }
 
+    /**
+     * @param $args
+     * @return ViewComponentResponse
+     * @throws \Exception
+     */
     protected function jsonMultiplyHandler( $args ){
         $this->testInputs( ['multiplier'=>['int']], $args );
         $resInt = $this->state['intRequired'] * $args['multiplier'];
         return new ViewComponentResponse( "application/json", json_encode( ['result'=>$resInt] ) );
     }
 
+    /**
+     * @param $args
+     * @return ViewComponentResponse
+     * @throws \Exception
+     */
     protected function setStateHandler( $args ){
         $this->testInputs( ['something'=>['int']], $args );
         $this->state['testProp'] = $args['something'];
         return new ViewComponentResponse( "text/plain", "OK" );
     }
 
+    /**
+     * @param $args
+     * @return ViewComponentResponse
+     */
     protected function getStateHandler( $args ){
         return new ViewComponentResponse( "text/plain", $this->state['testProp'] );
     }
