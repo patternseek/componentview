@@ -10,18 +10,6 @@
 
 namespace PatternSeek\ComponentView;
 
-// TODO MOVEME
-class ViewComponentResponse{
-    public $mime;
-    public $content;
-
-    function __construct( $mime, $content ){
-        $this->mime = $mime;
-        $this->content = $content;
-    }
-}
-
-
 /**
  * Class AbstractViewComponent
  * @package PatternSeek\ComponentView
@@ -29,6 +17,9 @@ class ViewComponentResponse{
 abstract class AbstractViewComponent
 {
 
+    /**
+     * @return array
+     */
     function __sleep(){
         return [
             'childComponents',
