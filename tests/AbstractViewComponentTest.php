@@ -9,7 +9,10 @@
  */
 namespace PatternSeek\ComponentView\Test;
 
-
+/**
+ * Class SomeClass
+ * @package PatternSeek\ComponentView\Test
+ */
 class SomeClass{}
 
 /**
@@ -42,9 +45,10 @@ class AbstractViewComponentTest extends \PHPUnit_Framework_TestCase {
                 #'SomeClassOptional'=>,
                 #'SomeClassWithPrebuiltDefault'=>,
             ];
-        $view = new HelloViewComponent();
-        $view->execFormHelper = function(  ){  };
-        $view->update( $props );
+        $view = new HelloViewComponent( null, null, $props );
+        $view->execFormHelper = function (){
+        };
+        $view->update();
         $outObj = $view->render();
 
 #        print_r( $out );
@@ -85,8 +89,8 @@ class AbstractViewComponentTest extends \PHPUnit_Framework_TestCase {
                 #'SomeClassOptional'=>,
                 #'SomeClassWithPrebuiltDefault'=>,
             ];
-        $view = new HelloViewComponent();
-        $view->update( $props );
+        $view = new HelloViewComponent( null, null, $props );
+        $view->update();
         $outObj = $view->render( "world.jsonMultiply", ['multiplier'=>3] ); // Multiplies multiplier * props['intRequired']
         $expected = json_encode( ['result'=>12 ] );
         $this->assertEquals( $expected, $outObj->content );
@@ -115,14 +119,14 @@ class AbstractViewComponentTest extends \PHPUnit_Framework_TestCase {
                 #'SomeClassOptional'=>,
                 #'SomeClassWithPrebuiltDefault'=>,
             ];
-        $view = new HelloViewComponent();
-        $view->update( $props );
+        $view = new HelloViewComponent( null, null, $props );
+        $view->update();
         $outObj = $view->render( "world.setState", ['something'=>5] ); // Multiplies multiplier * props['intRequired']
         $this->assertEquals( "OK", $outObj->content );
         $viewSer = serialize( $view );
         // Next page
         $view = unserialize( $viewSer );
-        $view->update( $props );
+        $view->update();
         $outObj = $view->render( "world.getState" ); // Multiplies multiplier * props['intRequired']
         $this->assertEquals( 5, $outObj->content );
     }
@@ -151,8 +155,8 @@ class AbstractViewComponentTest extends \PHPUnit_Framework_TestCase {
                 #'SomeClassOptional'=>,
                 #'SomeClassWithPrebuiltDefault'=>,
             ];
-        $view = new HelloViewComponent( $props );
-        $view->update( $props );
+        $view = new HelloViewComponent( null, null, $props );
+        $view->update();
 
         // Optional on
         $props =
@@ -176,8 +180,8 @@ class AbstractViewComponentTest extends \PHPUnit_Framework_TestCase {
                 'SomeClassOptional'=>new SomeClass(),
                 'SomeClassWithPrebuiltDefault'=>new SomeClass(),
             ];
-        $view = new HelloViewComponent( $props );
-        $view->update( $props );
+        $view = new HelloViewComponent( null, null, $props );
+        $view->update();
 
 
         // Failures
@@ -785,8 +789,8 @@ class AbstractViewComponentTest extends \PHPUnit_Framework_TestCase {
     protected function failConfig( $props ){
 
         try{
-            $view = new HelloViewComponent();
-            $view->update( $props );
+            $view = new HelloViewComponent( null, null, $props );
+            $view->update();
         }catch ( \Exception $e ){
             $this->assertTrue( true );
             return;

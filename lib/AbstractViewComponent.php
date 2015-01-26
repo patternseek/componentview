@@ -18,17 +18,17 @@ abstract class AbstractViewComponent
 {
 
     /**
-     * @return array
+     * A function that builds a URL for calling methods via exec()
+     * @var callable( @param string $execPath, @param mixed[] $args ) // This is an improvised PHPDoc format
      */
-    function __sleep(){
-        return [
-            'childComponents',
-            'handle',
-            'parent',
-            'state',
-            'template'
-        ];
-    }
+    public $execURLHelper;
+
+    /**
+     * A function that builds the header of a form for calling methods via exec().
+     * Templates are responsible for including the form body and </form>
+     * @var callable( @param string $execPath, @param string $method, @param string $formBody ) // This is an improvised PHPDoc format
+     */
+    public $execFormHelper;
 
     /**
      * @var ViewState An object containing state elements
@@ -67,23 +67,11 @@ abstract class AbstractViewComponent
     protected $template;
 
     /**
-     * A function that builds a URL for calling methods via exec()
-     * @var callable( @param string $execPath, @param mixed[] $args ) // This is an improvised PHPDoc format
-     */
-    public $execURLHelper;
-
-    /**
-     * A function that builds the header of a form for calling methods via exec().
-     * Templates are responsible for including the form body and </form>
-     * @var callable( @param string $execPath, @param string $method, @param string $formBody ) // This is an improvised PHPDoc format
-     */
-    public $execFormHelper;
-
-    /**
      * @param null $handle
      * @param AbstractViewComponent $parent
+     * @param $initConfig
      */
-    public function __construct( $handle = null, AbstractViewComponent $parent = null )
+    public function __construct( $handle = null, AbstractViewComponent $parent = null, $initConfig )
     {
         // Null means we are root
         $this->parent = $parent;
@@ -92,32 +80,24 @@ abstract class AbstractViewComponent
 
         // Defaults just cause an exception on use. Calling code should define these
         $this->execURLHelper =
-            function( $execPath, array $args = [] ){
+            function ( $execPath, array $args = [ ] ){
                 throw new \Exception( "Undefined execURLHelper" );
             };
 
         $this->execFormHelper =
-            function( $execPath, $method, $formBody ){
+            function ( $execPath, $method, $formBody ){
                 throw new \Exception( "Undefined execFormHelper" );
             };
 
+        // Set up the template
         $this->setupTemplate();
+
+        // Set up the state container
         $this->initState();
 
+        // Perform one-time init, if implemented by subclass
+        $this->init( $initConfig );
     }
-
-    /**
-     * Initialise $this->state with either a new ViewState or an appropriate subclass
-     * @return void
-     */
-    abstract protected function initState();
-
-    /**
-     * Using $props and $this->state, optionally update state, optionally create child components via addOrUpdateChild(), return template props
-     * @param array $props
-     * @return array Template props
-     */
-    abstract protected function doUpdate( array $props );
 
     /**
      * Load or configure the component's template as necessary
@@ -127,19 +107,47 @@ abstract class AbstractViewComponent
     abstract protected function setupTemplate();
 
     /**
-     * Does the tree have state? If so it should be persisted between requests.
-     * @return bool
+     * Initialise $this->state with either a new ViewState or an appropriate subclass
+     * @return void
      */
-    public function treeHasState(){
-        if( count( $this->state ) > 0 ){
-            return true;
+    abstract protected function initState();
+
+    /**
+     * @param $initConfig
+     * @return mixed
+     *
+     */
+    protected function init( $initConfig )
+    {
+        // Optional override
+    }
+
+    /**
+     * @return array
+     */
+    function __sleep()
+    {
+        return [
+            'childComponents',
+            'handle',
+            'parent',
+            'state',
+            'template'
+        ];
+    }
+
+    /**
+     * Fetch the root component and render it
+     * @return ViewComponentResponse
+     * @throws \Exception
+     */
+    public function renderRoot()
+    {
+        $cur = $this;
+        while ($cur->parent !== null) {
+            $cur = $cur->parent;
         }
-        foreach( $this->childComponents as $child ){
-            if( $child->treeHasState() ){
-                return true;
-            }
-        }
-        return false;
+        return $cur->render();
     }
 
     /**
@@ -151,17 +159,21 @@ abstract class AbstractViewComponent
      */
     public function render( $execMethodName = null, array $execArgs = null )
     {
-        if( null === $this->templateProps ){
-            throw new \Exception( "AbstractComponentView::update() must be called before render(). No template properties set for ".get_called_class());
+        if (null === $this->templateProps) {
+            throw new \Exception( "AbstractComponentView::update() must be called before render(). No template properties set for " . get_called_class() );
         }
+
+        // Test state
+        $this->state->validate();
+
         // If we're called with an 'exec' then run it instead of rendering the whole tree.
         // It may still render the whole tree or it may just render a portion or just return JSON
-        if( null !== $execMethodName ){
+        if (null !== $execMethodName) {
             $out = $this->exec( $execMethodName, $execArgs );
-        }else{
+        }else {
             $out = $this->template->render( $this->templateProps, $this->childComponents );
-            if( ! ( $out instanceof ViewComponentResponse ) ){
-                throw new \Exception( get_class($this->template)." returned invalid response. Should have been an instance of ViewComponentResponse" );
+            if (!( $out instanceof ViewComponentResponse )) {
+                throw new \Exception( get_class( $this->template ) . " returned invalid response. Should have been an instance of ViewComponentResponse" );
             }
         }
         $this->templateProps = null;
@@ -169,46 +181,47 @@ abstract class AbstractViewComponent
     }
 
     /**
-     * Fetch the root component and render it
+     * Execute a component method within the page or component.
+     * Called first on a top level component which then passes the call down to the appropriate sub-component (or executes on itself if appropriate).
+     * @param array|string $methodName A methodname in the format subComponent.anotherSubComponent.methodName. Either dotted string as described, or parts in an array. The top level page component shouldn't be included
+     * @param array $args
+     * @throws \Exception
      * @return ViewComponentResponse
-     * @throws \Exception
      */
-    public function renderRoot(){
-        $cur = $this;
-        while( $cur->parent !== null ){
-            $cur = $cur->parent;
-        }
-        return $cur->render();
-    }
-
-    /**
-     * Entry point for building or updating a tree. Call before render() when instantiating the component tree.
-     * @param $props
-     * @throws \Exception
-     */
-    public function update( $props )
+    public function exec( $methodName, array $args = null )
     {
-        // doUpdate() creates/updates children via addOrUpdateChild()
-        $this->templateProps = $this->doUpdate( $props );
-        // Prune children no longer in use
-        foreach ( array_keys( $this->childComponents ) as $handle) {
-            if (! $this->updatedChildren[$handle]) {
-                unset( $this->childComponents[$handle] );
+        if (!is_array( $methodName )) {
+            $methodName = explode( '.', $methodName );
+        }
+        if (count( $methodName ) == 1) {
+            $methodName = $methodName[ 0 ] . 'Handler';
+            $out = $this->$methodName( $args );
+        }else {
+            $childName = array_shift( $methodName );
+            $child = $this->childComponents[ $childName ];
+            if ($child instanceof AbstractViewComponent) {
+                $out = $child->exec( $methodName, $args );
+            }else {
+                throw new \Exception( implode( ".", $methodName ) . " is not a valid method." );
             }
         }
-        $this->updatedChildren = [];
+        if (!( $out instanceof ViewComponentResponse )) {
+            throw new \Exception( implode( ".",
+                    $methodName ) . " returned invalid response. Should have been an instance of ViewComponentResponse" );
+        }
+        return $out;
     }
-
 
     /**
      * Return the this object's path in the current component hierarchy
      * @return string
      */
-    public function getPath(){
-        if( null !== $this->parent ){
-            if( null !== ($pPath = $this->parent->getPath())){
-                return $pPath.'.'.$this->handle;
-            }else{
+    public function getPath()
+    {
+        if (null !== $this->parent) {
+            if (null !== ( $pPath = $this->parent->getPath() )) {
+                return $pPath . '.' . $this->handle;
+            }else {
                 return $this->handle;
             }
         }
@@ -221,53 +234,47 @@ abstract class AbstractViewComponent
      * @param string $handle
      * @param string $type
      * @param array $props
+     * @param array $initConfig
      * @return AbstractViewComponent
      */
-    public function addOrUpdateChild( $handle, $type, $props )
+    protected function addOrUpdateChild( $handle, $type, array $initConfig = null )
     {
-        if (! isset( $this->childComponents[$handle] ) ) {
-            $this->childComponents[$handle] = new $type( $handle, $this );
+        if (!isset( $this->childComponents[ $handle ] )) {
+            $child = new $type( $handle, $this, $initConfig );
+            $child->execURLHelper = $this->execURLHelper;
+            $child->execFormHelper = $this->execFormHelper;
+
+            $this->childComponents[ $handle ] = $child;
+        }else {
+            $child = $this->childComponents[ $handle ];
         }
-        $this->childComponents[$handle]->execURLHelper = $this->execURLHelper;
-        $this->childComponents[$handle]->execFormHelper = $this->execFormHelper;
-        $this->childComponents[$handle]->update( $props );
-        $this->updatedChildren[$handle] = true;
-        return $this->childComponents[$handle];
+        $child->update();
+        $this->updatedChildren[ $handle ] = true;
+        return $this->childComponents[ $handle ];
     }
-
-
-
 
     /**
-     * Execute a component method within the page or component.
-     * Called first on a top level component which then passes the call down to the appropriate sub-component (or executes on itself if appropriate).
-     * @param array|string $methodName A methodname in the format subComponent.anotherSubComponent.methodName. Either dotted string as described, or parts in an array. The top level page component shouldn't be included
-     * @param array $args
+     * Entry point for building or updating a tree. Call before render() when instantiating the component tree.
      * @throws \Exception
-     * @return ViewComponentResponse
      */
-    public function exec( $methodName, array $args = null )
+    public function update()
     {
-        if (! is_array( $methodName )) {
-            $methodName = explode( '.', $methodName );
-        }
-        if (count( $methodName ) == 1) {
-            $methodName = $methodName[0] . 'Handler';
-            $out = $this->$methodName( $args );
-        } else {
-            $childName = array_shift( $methodName );
-            $child = $this->childComponents[$childName];
-            if ($child instanceof AbstractViewComponent) {
-                $out = $child->exec( $methodName, $args );
-            }else{
-                throw new \Exception( implode(".", $methodName )." is not a valid method." );
+        // doUpdate() creates/updates children via addOrUpdateChild()
+        $this->templateProps = $this->doUpdate();
+        // Prune children no longer in use
+        foreach (array_keys( $this->childComponents ) as $handle) {
+            if (!$this->updatedChildren[ $handle ]) {
+                unset( $this->childComponents[ $handle ] );
             }
         }
-        if( ! ( $out instanceof ViewComponentResponse ) ){
-            throw new \Exception( implode(".", $methodName )." returned invalid response. Should have been an instance of ViewComponentResponse" );
-        }
-        return $out;
+        $this->updatedChildren = [ ];
     }
+
+    /**
+     * Using $this->state, optionally update state, optionally create child components via addOrUpdateChild(), return template props
+     * @return array Template props
+     */
+    abstract protected function doUpdate();
 
     /**
      * testInputs() compares a set of named inputs (props or args) in the associative array $inputs with an input specification.
@@ -308,27 +315,27 @@ abstract class AbstractViewComponent
         foreach ($inputSpec as $fieldName => $fieldSpec) {
             // Required field
             if (( count( $fieldSpec ) < 2 )) {
-                if (! isset( $inputs[$fieldName] )) {
+                if (!isset( $inputs[ $fieldName ] )) {
                     throw new \Exception( $fieldName . " is a required field for " . get_class( $this ) );
                 }
             }
 
             // Set default is unset
-            if (! isset( $inputs[$fieldName] )) {
-                $inputs[$fieldName] = $fieldSpec[1];
+            if (!isset( $inputs[ $fieldName ] )) {
+                $inputs[ $fieldName ] = $fieldSpec[ 1 ];
             }
 
             // Check type
             // Any type allowed, continue
-            if (! isset( $fieldSpec[0] ) || $fieldSpec[0] === null) {
+            if (!isset( $fieldSpec[ 0 ] ) || $fieldSpec[ 0 ] === null) {
                 continue;
             }
-            $requiredType = $fieldSpec[0];
-            $input = $inputs[$fieldName];
+            $requiredType = $fieldSpec[ 0 ];
+            $input = $inputs[ $fieldName ];
             // Specific type required
             $failed = true;
             // Null is allowed
-            if (! is_null( $input )) {
+            if (!is_null( $input )) {
                 switch ($requiredType) {
                     case "boolean":
                     case "bool":

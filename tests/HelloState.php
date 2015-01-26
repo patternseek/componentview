@@ -17,11 +17,11 @@ use Symfony\Component\Validator\Constraints as Assert;
  * Class WorldState
  * @package PatternSeek\ComponentView\Test
  */
-class WorldState extends ViewState
+class HelloState extends ViewState
 {
 
     /**
-     * @var integer
+     * @var bool
      *
      * @Assert\Type(type="integer")
      */
@@ -33,12 +33,5 @@ class WorldState extends ViewState
      * @Assert\Type(type="string")
      */
     public $name;
-
-    /**
-     * @var string
-     *
-     * @Assert\Type(type="string")
-     */
-    public $testProp;
 
 }
