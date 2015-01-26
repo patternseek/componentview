@@ -1,6 +1,6 @@
 <?php
 /*
- * This file is part of the Patternseek ECommerce library.
+ * This file is part of the Patternseek ComponentView library.
  *
  * (c)2015 Tolan Blundell <tolan@patternseek.net>
  *
