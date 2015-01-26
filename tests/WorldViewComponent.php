@@ -39,7 +39,7 @@ class WorldViewComponent extends AbstractViewComponent{
      * @param $initConfig
      * @throws \Exception
      */
-    protected function init( $initConfig )
+    protected function initComponent( $initConfig )
     {
 
         $this->testInputs(
@@ -90,7 +90,7 @@ class WorldViewComponent extends AbstractViewComponent{
      *
      * @return void
      */
-    protected function setupTemplate()
+    protected function initTemplate()
     {
         $tplTwig = <<<EOS
 World. From: {{props.name}}

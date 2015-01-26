@@ -90,13 +90,13 @@ abstract class AbstractViewComponent
             };
 
         // Set up the template
-        $this->setupTemplate();
+        $this->initTemplate();
 
         // Set up the state container
         $this->initState();
 
         // Perform one-time init, if implemented by subclass
-        $this->init( $initConfig );
+        $this->initComponent( $initConfig );
     }
 
     /**
@@ -104,7 +104,7 @@ abstract class AbstractViewComponent
      *
      * @return void
      */
-    abstract protected function setupTemplate();
+    abstract protected function initTemplate();
 
     /**
      * Initialise $this->state with either a new ViewState or an appropriate subclass
@@ -117,7 +117,7 @@ abstract class AbstractViewComponent
      * @return mixed
      *
      */
-    protected function init( $initConfig )
+    protected function initComponent( $initConfig )
     {
         // Optional override
     }

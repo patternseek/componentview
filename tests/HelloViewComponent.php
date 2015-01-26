@@ -30,7 +30,7 @@ class HelloViewComponent extends AbstractViewComponent{
      *
      * @return void
      */
-    protected function setupTemplate()
+    protected function initTemplate()
     {
         $tplTwig = <<<EOS
 Hello {{component( 'world' )}}
@@ -43,7 +43,7 @@ EOS;
      * @param $initConfig
      * @throws \Exception
      */
-    protected function init( $initConfig )
+    protected function initComponent( $initConfig )
     {
         $this->testInputs(
             [
