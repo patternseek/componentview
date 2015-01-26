@@ -261,6 +261,9 @@ abstract class AbstractViewComponent
     {
         // doUpdate() creates/updates children via addOrUpdateChild()
         $this->templateProps = $this->doUpdate();
+        if (!is_array( $this->templateProps )) {
+            throw new \Exception( get_called_class() . "::doUpdate() must return an array" );
+        }
         // Prune children no longer in use
         foreach (array_keys( $this->childComponents ) as $handle) {
             if (!$this->updatedChildren[ $handle ]) {
