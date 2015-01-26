@@ -203,8 +203,14 @@
             "version": "dev-master",
             "source": {
                 "type": "git",
-                "url": "/home/tolan/storage/workspace/patternseek-structclass",
-                "reference": "ec3d65ece30d84b7e2e24738228d5182b1642900"
+                "url": "https://github.com/patternseek/structclass.git",
+                "reference": "59120da6cf59f411bc022ac3561ed3e1f97b292f"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/patternseek/structclass/zipball/59120da6cf59f411bc022ac3561ed3e1f97b292f",
+                "reference": "59120da6cf59f411bc022ac3561ed3e1f97b292f",
+                "shasum": ""
             },
             "require": {
                 "doctrine/annotations": "*",
@@ -218,6 +224,7 @@
                     "PatternSeek\\StructClass\\": "lib"
                 }
             },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
@@ -231,7 +238,7 @@
             "keywords": [
                 "library"
             ],
-            "time": "2015-01-22 15:16:40"
+            "time": "2015-01-26 12:22:36"
         },
         {
             "name": "symfony/translation",
