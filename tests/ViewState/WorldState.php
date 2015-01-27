@@ -8,20 +8,20 @@
  * file that was distributed with this source code.
  */
 
-namespace PatternSeek\ComponentView\Test;
+namespace PatternSeek\ComponentView\Test\ViewState;
 
-use PatternSeek\ComponentView\ViewState;
+use PatternSeek\ComponentView\ViewState\ViewState;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Class WorldState
  * @package PatternSeek\ComponentView\Test
  */
-class HelloState extends ViewState
+class WorldState extends ViewState
 {
 
     /**
-     * @var bool
+     * @var integer
      *
      * @Assert\Type(type="integer")
      */
@@ -33,5 +33,12 @@ class HelloState extends ViewState
      * @Assert\Type(type="string")
      */
     public $name;
+
+    /**
+     * @var string
+     *
+     * @Assert\Type(type="string")
+     */
+    public $testProp;
 
 }

@@ -8,7 +8,9 @@
  * file that was distributed with this source code.
  */
 
-namespace PatternSeek\ComponentView;
+namespace PatternSeek\ComponentView\Template;
+
+use PatternSeek\ComponentView\AbstractViewComponent;
 
 /**
  * AbstractTemplates wrap and provide tools to the an actual implementation-specific template.

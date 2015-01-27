@@ -1,8 +1,9 @@
 <?php
-namespace PatternSeek\ComponentView\Test;
+namespace PatternSeek\ComponentView\Test\Component;
 
 use PatternSeek\ComponentView\AbstractViewComponent;
-use PatternSeek\ComponentView\TwigTemplate;
+use PatternSeek\ComponentView\Template\TwigTemplate;
+use PatternSeek\ComponentView\Test\ViewState\WorldState;
 use PatternSeek\ComponentView\ViewComponentResponse;
 
 /**

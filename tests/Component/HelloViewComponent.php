@@ -1,9 +1,10 @@
 <?php
-namespace PatternSeek\ComponentView\Test;
+namespace PatternSeek\ComponentView\Test\Component;
 
 use PatternSeek\ComponentView\AbstractViewComponent;
-use PatternSeek\ComponentView\TwigTemplate;
-use PatternSeek\ComponentView\ViewState;
+use PatternSeek\ComponentView\Template\TwigTemplate;
+use PatternSeek\ComponentView\Test\SomeClass;
+use PatternSeek\ComponentView\Test\ViewState\HelloState;
 
 /**
  * Class HelloViewComponent
@@ -82,7 +83,7 @@ EOS;
 
         $this->addOrUpdateChild(
             "world",
-            "\\PatternSeek\\ComponentView\\Test\\WorldViewComponent",
+            "\\PatternSeek\\ComponentView\\Test\\Component\\WorldViewComponent",
             [   // This is just passing specific parent inputs to the child
                 'name' => $this->state->name,
                 'intRequired' => $this->state->intRequired

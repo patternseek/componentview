@@ -8,7 +8,7 @@
  * file that was distributed with this source code.
  */
 
-namespace PatternSeek\ComponentView;
+namespace PatternSeek\ComponentView\ViewState;
 
 use PatternSeek\StructClass\StructClass;
 

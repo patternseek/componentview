@@ -9,6 +9,8 @@
  */
 namespace PatternSeek\ComponentView\Test;
 
+use PatternSeek\ComponentView\Test\Component\HelloViewComponent;
+
 /**
  * Class SomeClass
  * @package PatternSeek\ComponentView\Test

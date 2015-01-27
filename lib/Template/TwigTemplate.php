@@ -7,8 +7,10 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-namespace PatternSeek\ComponentView;
+namespace PatternSeek\ComponentView\Template;
 
+use PatternSeek\ComponentView\AbstractViewComponent;
+use PatternSeek\ComponentView\ViewComponentResponse;
 use Twig_Autoloader;
 use Twig_Environment;
 use Twig_Loader_String;
