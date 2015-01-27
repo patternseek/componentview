@@ -18,22 +18,14 @@ abstract class AbstractViewComponent
 {
 
     /**
-     * A function that builds a URL for calling methods via exec()
-     * @var callable( @param string $execPath, @param mixed[] $args ) // This is an improvised PHPDoc format
-     */
-    public $execURLHelper;
-
-    /**
-     * A function that builds the header of a form for calling methods via exec().
-     * Templates are responsible for including the form body and </form>
-     * @var callable( @param string $execPath, @param string $method, @param string $formBody ) // This is an improvised PHPDoc format
-     */
-    public $execFormHelper;
-
-    /**
      * @var ViewState An object containing state elements
      */
     protected $state;
+
+    /**
+     * @var ComponentViewExecHelper
+     */
+    public $execHelper;
 
     /**
      * @var array An array of named properties for this component's template
@@ -69,25 +61,26 @@ abstract class AbstractViewComponent
     /**
      * @param null $handle
      * @param AbstractViewComponent $parent
-     * @param $initConfig
+     * @param array $initConfig
+     * @param ComponentViewExecHelper $execHelper
      */
-    public function __construct( $handle = null, AbstractViewComponent $parent = null, $initConfig )
-    {
+    public function __construct(
+        $handle = null,
+        AbstractViewComponent $parent = null,
+        $initConfig = [ ],
+        ComponentViewExecHelper $execHelper = null
+    ){
         // Null means we are root
         $this->parent = $parent;
 
+        // Null means we are root
         $this->handle = $handle;
 
-        // Defaults just cause an exception on use. Calling code should define these
-        $this->execURLHelper =
-            function ( $execPath, array $args = [ ] ){
-                throw new \Exception( "Undefined execURLHelper" );
-            };
+        if (null === $execHelper) {
+            $execHelper = new ComponentViewExecHelper();
+        }
 
-        $this->execFormHelper =
-            function ( $execPath, $method, $formBody ){
-                throw new \Exception( "Undefined execFormHelper" );
-            };
+        $this->execHelper = $execHelper;
 
         // Set up the template
         $this->initTemplate();
@@ -131,7 +124,8 @@ abstract class AbstractViewComponent
             'childComponents',
             'handle',
             'parent',
-            'state' // Removed template as can contain closures which can't be serialised
+            'state',
+            'execHelper'
         ];
     }
 
@@ -240,13 +234,11 @@ abstract class AbstractViewComponent
     protected function addOrUpdateChild( $handle, $type, array $initConfig = null )
     {
         if (!isset( $this->childComponents[ $handle ] )) {
-            $child = new $type( $handle, $this, $initConfig );
+            $child = new $type( $handle, $this, $initConfig, $this->execHelper );
             $this->childComponents[ $handle ] = $child;
         }else {
             $child = $this->childComponents[ $handle ];
         }
-        $child->execURLHelper = $this->execURLHelper;
-        $child->execFormHelper = $this->execFormHelper;
         $child->update();
         $this->updatedChildren[ $handle ] = true;
         return $this->childComponents[ $handle ];

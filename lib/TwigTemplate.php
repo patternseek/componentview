@@ -61,15 +61,15 @@ class TwigTemplate extends AbstractTemplate{
             };
 
         $this->twig->addFunction('component', new \Twig_Function_Function( $componentRenderFunc ));
-        $this->twig->addFunction('execURL', new \Twig_Function_Function( $this->component->execURLHelper ));
-        $this->twig->addFunction('execForm', new \Twig_Function_Function( $this->component->execFormHelper ));
+
 
         $rendered = $this->twig->render(
             $this->templateString,
             [
                 '_path'=>$this->component->getPath(),
                 'props'=>$props,
-                'components'=>$components
+                'components' => $components,
+                'exec' => $this->component->execHelper
             ] );
         return new ViewComponentResponse( "text/html", $rendered );
     }
