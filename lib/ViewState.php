@@ -11,7 +11,6 @@
 namespace PatternSeek\ComponentView;
 
 use PatternSeek\StructClass\StructClass;
-use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Class ViewState
