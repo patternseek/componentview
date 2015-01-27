@@ -10,7 +10,7 @@
 
 namespace PatternSeek\ComponentView;
 
-class ComponentViewExecHelper
+class ExecHelper
 {
 
     /**
@@ -21,8 +21,8 @@ class ComponentViewExecHelper
      */
     function url( $execPath, $args = [ ] )
     {
-        $cmd = tf_substr( get_class(), 3 );
-        $qs = http_build_query( [ 'cmd' => $cmd, 'exec' => $execPath, 'args' => $args ] );
+        $args[ 'exec' ] = $execPath;
+        $qs = http_build_query( $args );
         return "?{$qs}";
     }
 

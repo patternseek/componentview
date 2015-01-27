@@ -23,7 +23,7 @@ abstract class AbstractViewComponent
     protected $state;
 
     /**
-     * @var ComponentViewExecHelper
+     * @var ExecHelper
      */
     public $execHelper;
 
@@ -62,13 +62,13 @@ abstract class AbstractViewComponent
      * @param null $handle
      * @param AbstractViewComponent $parent
      * @param array $initConfig
-     * @param ComponentViewExecHelper $execHelper
+     * @param ExecHelper $execHelper
      */
     public function __construct(
         $handle = null,
         AbstractViewComponent $parent = null,
         $initConfig = [ ],
-        ComponentViewExecHelper $execHelper = null
+        ExecHelper $execHelper = null
     ){
         // Null means we are root
         $this->parent = $parent;
@@ -77,7 +77,7 @@ abstract class AbstractViewComponent
         $this->handle = $handle;
 
         if (null === $execHelper) {
-            $execHelper = new ComponentViewExecHelper();
+            $execHelper = new ExecHelper();
         }
 
         $this->execHelper = $execHelper;
@@ -212,14 +212,15 @@ abstract class AbstractViewComponent
      */
     public function getPath()
     {
-        if (null !== $this->parent) {
-            if (null !== ( $pPath = $this->parent->getPath() )) {
-                return $pPath . '.' . $this->handle;
-            }else {
-                return $this->handle;
-            }
+        if (null === $this->parent) {
+            return null;
         }
-        return null;
+        if (null !== ( $pPath = $this->parent->getPath() )) {
+            return $pPath . '.' . $this->handle;
+        }else {
+            return $this->handle;
+        }
+
     }
 
     /**
