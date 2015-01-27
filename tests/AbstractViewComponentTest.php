@@ -59,11 +59,19 @@ class AbstractViewComponentTest extends \PHPUnit_Framework_TestCase {
 #        $defrosted = unserialize( $frozen );
 #        print_r( $defrosted );
 
-        $expected = "Hello World. From: someone";
-        $outStr = str_replace(' ', '', $outObj->content);
-#echo "hihi\n\n".$outStr;
-        $expected = str_replace(' ', '', $expected);
-        $this->assertEquals( $expected, $outStr );
+        $expected = <<<EOS
+Hello World. From: someone
+This path: world
+Exec URL: ?a=1&exec=world.someExec
+Exec Form:
+				<form method="POST" action="">
+					<input type="hidden" name="exec" value="world.otherExec">
+					<input type="text" name="someInput" value="2">
+
+				</form>
+EOS;
+        file_put_contents( "/tmp/out", $outObj->content );
+        $this->assertEquals( $expected, $outObj->content );
 
     }
 
