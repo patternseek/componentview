@@ -241,13 +241,12 @@ abstract class AbstractViewComponent
     {
         if (!isset( $this->childComponents[ $handle ] )) {
             $child = new $type( $handle, $this, $initConfig );
-            $child->execURLHelper = $this->execURLHelper;
-            $child->execFormHelper = $this->execFormHelper;
-
             $this->childComponents[ $handle ] = $child;
         }else {
             $child = $this->childComponents[ $handle ];
         }
+        $child->execURLHelper = $this->execURLHelper;
+        $child->execFormHelper = $this->execFormHelper;
         $child->update();
         $this->updatedChildren[ $handle ] = true;
         return $this->childComponents[ $handle ];
