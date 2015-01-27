@@ -131,8 +131,7 @@ abstract class AbstractViewComponent
             'childComponents',
             'handle',
             'parent',
-            'state',
-            'template'
+            'state' // Removed template as can contain closures which can't be serialised
         ];
     }
 
@@ -171,6 +170,7 @@ abstract class AbstractViewComponent
         if (null !== $execMethodName) {
             $out = $this->exec( $execMethodName, $execArgs );
         }else {
+            $this->initTemplate();
             $out = $this->template->render( $this->templateProps, $this->childComponents );
             if (!( $out instanceof ViewComponentResponse )) {
                 throw new \Exception( get_class( $this->template ) . " returned invalid response. Should have been an instance of ViewComponentResponse" );

@@ -20,11 +20,5 @@ use Symfony\Component\Validator\Constraints as Assert;
 class ViewState extends StructClass
 {
 
-    /**
-     * @var bool initialised
-     *
-     * @Assert\Type(type="boolean")
-     */
-    public $initialised = false;
-
+// Placeholder for possible future globally required state entries
 }
