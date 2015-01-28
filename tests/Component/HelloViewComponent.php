@@ -76,15 +76,16 @@ EOS;
 
     /**
      * Using $props and $this->state, optionally update state, optionally create child components via addOrUpdateChild(), return template props
+     * @param $props
      * @return array Template props
      */
-    protected function doUpdate()
+    protected function doUpdate( $props )
     {
 
 
         $this->addOrUpdateChild(
-            "world",
-            "\\PatternSeek\\ComponentView\\Test\\Component\\WorldViewComponent",
+            "world", "\\PatternSeek\\ComponentView\\Test\\Component\\WorldViewComponent",
+            [ ],
             [   // This is just passing specific parent inputs to the child
                 'name' => $this->state->name,
                 'intRequired' => $this->state->intRequired

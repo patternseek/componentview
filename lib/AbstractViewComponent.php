@@ -248,8 +248,9 @@ abstract class AbstractViewComponent
      * @param array $props
      * @param array $initConfig
      * @return AbstractViewComponent
+     * @throws \Exception
      */
-    protected function addOrUpdateChild( $handle, $type, array $initConfig = null )
+    protected function addOrUpdateChild( $handle, $type, $props, array $initConfig = null )
     {
         if (!isset( $this->childComponents[ $handle ] )) {
             $child = new $type( $handle, $this, $initConfig, $this->exec );
@@ -257,19 +258,20 @@ abstract class AbstractViewComponent
         }else {
             $child = $this->childComponents[ $handle ];
         }
-        $child->update();
+        $child->update( $props );
         $this->updatedChildren[ $handle ] = true;
         return $this->childComponents[ $handle ];
     }
 
     /**
      * Entry point for building or updating a tree. Call before render() when instantiating the component tree.
+     * @param $props
      * @throws \Exception
      */
-    public function update()
+    public function update( $props = [ ] )
     {
         // doUpdate() creates/updates children via addOrUpdateChild()
-        $this->templateProps = $this->doUpdate();
+        $this->templateProps = $this->doUpdate( $props );
         if (!is_array( $this->templateProps )) {
             throw new \Exception( get_called_class() . "::doUpdate() must return an array" );
         }
@@ -284,9 +286,10 @@ abstract class AbstractViewComponent
 
     /**
      * Using $this->state, optionally update state, optionally create child components via addOrUpdateChild(), return template props
+     * @param $props
      * @return array Template props
      */
-    abstract protected function doUpdate();
+    abstract protected function doUpdate( $props );
 
     /**
      * testInputs() compares a set of named inputs (props or args) in the associative array $inputs with an input specification.
