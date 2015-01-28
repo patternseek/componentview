@@ -63,11 +63,11 @@ class AbstractViewComponentTest extends \PHPUnit_Framework_TestCase {
 Hello World. From: someone
 Exec URL: ?a=1&exec=world.someExec
 Exec Form:
-				<form method="POST" action="">
-					<input type="hidden" name="exec" value="world.otherExec">
-					<input type="text" name="someInput" value="2">
+<form method="POST" action="">
+    <input type="hidden" name="exec" value="world.otherExec">
+    <input type="text" name="someInput" value="2">
 
-				</form>
+</form>
 An exec url ?w1=w1&exec=someExec
 EOS;
         file_put_contents( "/tmp/out", $outObj->content );

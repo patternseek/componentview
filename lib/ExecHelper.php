@@ -45,12 +45,11 @@ class ExecHelper
      */
     public function wrapForm( $execMethod, $method, $formBody )
     {
-
         return <<<EOS
-				<form method="{$method}" action="">
-					<input type="hidden" name="exec" value="{$this->component->getExecPath( $execMethod )}">
-					{$formBody}
-				</form>
+<form method="{$method}" action="">
+    <input type="hidden" name="exec" value="{$this->component->getExecPath( $execMethod )}">
+    {$formBody}
+</form>
 EOS;
     }
 }
