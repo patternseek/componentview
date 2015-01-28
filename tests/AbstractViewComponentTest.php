@@ -61,7 +61,6 @@ class AbstractViewComponentTest extends \PHPUnit_Framework_TestCase {
 
         $expected = <<<EOS
 Hello World. From: someone
-This path: world
 Exec URL: ?a=1&exec=world.someExec
 Exec Form:
 				<form method="POST" action="">

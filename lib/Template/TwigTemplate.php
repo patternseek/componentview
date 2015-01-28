@@ -68,10 +68,10 @@ class TwigTemplate extends AbstractTemplate{
         $rendered = $this->twig->render(
             $this->templateString,
             [
-                '_path'=>$this->component->getPath(),
                 'props'=>$props,
-                'components' => $components,
-                'exec' => $this->component->execHelper
+                'children' => $components,
+                'this' => $this->component,
+                'parent' => $this->component->getParent()
             ] );
         return new ViewComponentResponse( "text/html", $rendered );
     }

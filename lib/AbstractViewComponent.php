@@ -10,6 +10,9 @@
 
 namespace PatternSeek\ComponentView;
 
+use PatternSeek\ComponentView\Template\AbstractTemplate;
+use PatternSeek\ComponentView\ViewState\ViewState;
+
 /**
  * Class AbstractViewComponent
  * @package PatternSeek\ComponentView
@@ -25,7 +28,7 @@ abstract class AbstractViewComponent
     /**
      * @var ExecHelper
      */
-    public $execHelper;
+    public $exec;
 
     /**
      * @var array An array of named properties for this component's template
@@ -80,7 +83,8 @@ abstract class AbstractViewComponent
             $execHelper = new ExecHelper();
         }
 
-        $this->execHelper = $execHelper;
+        $this->exec = clone $execHelper;
+        $this->exec->setComponent( $this );
 
         // Set up the template
         $this->initTemplate();
@@ -125,7 +129,7 @@ abstract class AbstractViewComponent
             'handle',
             'parent',
             'state',
-            'execHelper'
+            'exec'
         ];
     }
 
@@ -161,7 +165,7 @@ abstract class AbstractViewComponent
 
         // If we're called with an 'exec' then run it instead of rendering the whole tree.
         // It may still render the whole tree or it may just render a portion or just return JSON
-        if (null !== $execMethodName) {
+        if ($execMethodName) { // Used to test for null but it could easily be an empty string
             $out = $this->exec( $execMethodName, $execArgs );
         }else {
             $this->initTemplate();
@@ -210,7 +214,7 @@ abstract class AbstractViewComponent
      * Return the this object's path in the current component hierarchy
      * @return string
      */
-    public function getPath()
+    protected function getPath()
     {
         if (null === $this->parent) {
             return null;
@@ -220,7 +224,20 @@ abstract class AbstractViewComponent
         }else {
             return $this->handle;
         }
+    }
 
+    public function getExecPath( $execMethod )
+    {
+        $path = $this->getPath();
+        return $path . '.' . $execMethod;
+    }
+
+    /**
+     * @return AbstractViewComponent
+     */
+    public function getParent()
+    {
+        return $this->parent;
     }
 
     /**
@@ -235,7 +252,7 @@ abstract class AbstractViewComponent
     protected function addOrUpdateChild( $handle, $type, array $initConfig = null )
     {
         if (!isset( $this->childComponents[ $handle ] )) {
-            $child = new $type( $handle, $this, $initConfig, $this->execHelper );
+            $child = new $type( $handle, $this, $initConfig, $this->exec );
             $this->childComponents[ $handle ] = $child;
         }else {
             $child = $this->childComponents[ $handle ];
