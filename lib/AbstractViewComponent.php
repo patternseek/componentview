@@ -229,7 +229,7 @@ abstract class AbstractViewComponent
     public function getExecPath( $execMethod )
     {
         $path = $this->getPath();
-        return $path . '.' . $execMethod;
+        return ( $path == null?$execMethod:$path . '.' . $execMethod );
     }
 
     /**

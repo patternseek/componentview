@@ -35,6 +35,7 @@ class HelloViewComponent extends AbstractViewComponent{
     {
         $tplTwig = <<<EOS
 Hello {{component( 'world' )}}
+An exec url {{ this.exec.url( "someExec", {'w1':'w1'} ) }}
 EOS;
 
         $this->template = new TwigTemplate( $this, $tplTwig );

@@ -68,6 +68,7 @@ Exec Form:
 					<input type="text" name="someInput" value="2">
 
 				</form>
+An exec url ?w1=w1&exec=someExec
 EOS;
         file_put_contents( "/tmp/out", $outObj->content );
         $this->assertEquals( $expected, $outObj->content );
