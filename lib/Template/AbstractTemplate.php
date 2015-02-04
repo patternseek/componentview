@@ -11,6 +11,7 @@
 namespace PatternSeek\ComponentView\Template;
 
 use PatternSeek\ComponentView\AbstractViewComponent;
+use PatternSeek\ComponentView\ViewState\ViewState;
 
 /**
  * AbstractTemplates wrap and provide tools to the an actual implementation-specific template.
@@ -31,13 +32,6 @@ abstract class AbstractTemplate{
     protected $component;
 
     /**
-     * @param array $props
-     * @param AbstractViewComponent[] $components
-     * @return string
-     */
-    abstract protected function doRender( array $props, array $components );
-
-    /**
      * @param AbstractViewComponent $component
      */
     public function __construct( AbstractViewComponent $component ){
@@ -50,8 +44,17 @@ abstract class AbstractTemplate{
      * @param AbstractViewComponent[] $components
      * @return string
      */
-    public function render( array $props, array $components ){
-        return $this->doRender( $props, $components );
+    public function render( ViewState $state, array $components )
+    {
+        return $this->doRender( $state, $components );
     }
+
+    /**
+     * @param array|ViewState $state
+     * @param AbstractViewComponent[] $components
+     * @return string
+     * @internal param array $props
+     */
+    abstract protected function doRender( ViewState $state, array $components );
 
 }

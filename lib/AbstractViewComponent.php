@@ -21,20 +21,13 @@ abstract class AbstractViewComponent
 {
 
     /**
-     * @var ViewState An object containing state elements
-     */
-    protected $state;
-
-    /**
      * @var ExecHelper
      */
     public $exec;
-
     /**
-     * @var array An array of named properties for this component's template
+     * @var ViewState An object containing state elements
      */
-    protected $templateProps = null;
-
+    protected $state;
     /**
      * @var AbstractViewComponent
      */
@@ -97,29 +90,6 @@ abstract class AbstractViewComponent
     }
 
     /**
-     * Load or configure the component's template as necessary
-     *
-     * @return void
-     */
-    abstract protected function initTemplate();
-
-    /**
-     * Initialise $this->state with either a new ViewState or an appropriate subclass
-     * @return void
-     */
-    abstract protected function initState();
-
-    /**
-     * @param $initConfig
-     * @return mixed
-     *
-     */
-    protected function initComponent( $initConfig )
-    {
-        // Optional override
-    }
-
-    /**
      * @return array
      */
     function __sleep()
@@ -156,10 +126,6 @@ abstract class AbstractViewComponent
      */
     public function render( $execMethodName = null, array $execArgs = null )
     {
-        if (null === $this->templateProps) {
-            throw new \Exception( "AbstractComponentView::update() must be called before render(). No template properties set for " . get_called_class() );
-        }
-
         // Test state
         $this->state->validate();
 
@@ -169,12 +135,11 @@ abstract class AbstractViewComponent
             $out = $this->exec( $execMethodName, $execArgs );
         }else {
             $this->initTemplate();
-            $out = $this->template->render( $this->templateProps, $this->childComponents );
+            $out = $this->template->render( $this->state, $this->childComponents );
             if (!( $out instanceof ViewComponentResponse )) {
                 throw new \Exception( get_class( $this->template ) . " returned invalid response. Should have been an instance of ViewComponentResponse" );
             }
         }
-        $this->templateProps = null;
         return $out;
     }
 
@@ -210,6 +175,62 @@ abstract class AbstractViewComponent
         return $out;
     }
 
+    public function getExecPath( $execMethod )
+    {
+        $path = $this->getPath();
+        return ( $path == null?$execMethod:$path . '.' . $execMethod );
+    }
+
+    /**
+     * @return AbstractViewComponent
+     */
+    public function getParent()
+    {
+        return $this->parent;
+    }
+
+    /**
+     * Entry point for building or updating a tree. Call before render() when instantiating the component tree.
+     * @param $props
+     * @throws \Exception
+     */
+    public function update( $props = [ ] )
+    {
+        // doUpdate() creates/updates children via addOrUpdateChild()
+        $this->doUpdate( $props );
+
+        // Prune children no longer in use
+        foreach (array_keys( $this->childComponents ) as $handle) {
+            if (!$this->updatedChildren[ $handle ]) {
+                unset( $this->childComponents[ $handle ] );
+            }
+        }
+        $this->updatedChildren = [ ];
+    }
+
+    /**
+     * Load or configure the component's template as necessary
+     *
+     * @return void
+     */
+    abstract protected function initTemplate();
+
+    /**
+     * Initialise $this->state with either a new ViewState or an appropriate subclass
+     * @return void
+     */
+    abstract protected function initState();
+
+    /**
+     * @param $initConfig
+     * @return mixed
+     *
+     */
+    protected function initComponent( $initConfig )
+    {
+        // Optional override
+    }
+
     /**
      * Return the this object's path in the current component hierarchy
      * @return string
@@ -224,20 +245,6 @@ abstract class AbstractViewComponent
         }else {
             return $this->handle;
         }
-    }
-
-    public function getExecPath( $execMethod )
-    {
-        $path = $this->getPath();
-        return ( $path == null?$execMethod:$path . '.' . $execMethod );
-    }
-
-    /**
-     * @return AbstractViewComponent
-     */
-    public function getParent()
-    {
-        return $this->parent;
     }
 
     /**
@@ -264,30 +271,9 @@ abstract class AbstractViewComponent
     }
 
     /**
-     * Entry point for building or updating a tree. Call before render() when instantiating the component tree.
-     * @param $props
-     * @throws \Exception
-     */
-    public function update( $props = [ ] )
-    {
-        // doUpdate() creates/updates children via addOrUpdateChild()
-        $this->templateProps = $this->doUpdate( $props );
-        if (!is_array( $this->templateProps )) {
-            throw new \Exception( get_called_class() . "::doUpdate() must return an array" );
-        }
-        // Prune children no longer in use
-        foreach (array_keys( $this->childComponents ) as $handle) {
-            if (!$this->updatedChildren[ $handle ]) {
-                unset( $this->childComponents[ $handle ] );
-            }
-        }
-        $this->updatedChildren = [ ];
-    }
-
-    /**
-     * Using $this->state, optionally update state, optionally create child components via addOrUpdateChild(), return template props
-     * @param $props
-     * @return array Template props
+     * Using $this->state, optionally update state, optionally create child components via addOrUpdateChild().
+     * @param array $props
+     * @return void
      */
     abstract protected function doUpdate( $props );
 

@@ -11,6 +11,7 @@ namespace PatternSeek\ComponentView\Template;
 
 use PatternSeek\ComponentView\AbstractViewComponent;
 use PatternSeek\ComponentView\ViewComponentResponse;
+use PatternSeek\ComponentView\ViewState\ViewState;
 use Twig_Autoloader;
 use Twig_Environment;
 use Twig_Loader_String;
@@ -49,11 +50,11 @@ class TwigTemplate extends AbstractTemplate{
     }
 
     /**
-     * @param array $props
+     * @param array|ViewState $state
      * @param \PatternSeek\ComponentView\AbstractViewComponent[] $components
      * @return string
      */
-    protected function doRender( array $props, array $components )
+    protected function doRender( ViewState $state, array $components )
     {
 
         // This is defined here as this is where $components is available. It would be better in the superclass.
@@ -68,7 +69,7 @@ class TwigTemplate extends AbstractTemplate{
         $rendered = $this->twig->render(
             $this->templateString,
             [
-                'props'=>$props,
+                'state' => $state,
                 'children' => $components,
                 'this' => $this->component,
                 'parent' => $this->component->getParent()
