@@ -38,6 +38,7 @@ class WorldViewComponent extends AbstractViewComponent{
 
     /**
      * @param $initConfig
+     * @return void
      * @throws \Exception
      */
     protected function initComponent( $initConfig )

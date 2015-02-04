@@ -223,7 +223,7 @@ abstract class AbstractViewComponent
 
     /**
      * @param $initConfig
-     * @return mixed
+     * @return void
      *
      */
     protected function initComponent( $initConfig )
