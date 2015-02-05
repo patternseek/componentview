@@ -128,13 +128,13 @@ abstract class AbstractViewComponent
     {
         // Test state
         $this->state->validate();
+        $this->initTemplate();
 
         // If we're called with an 'exec' then run it instead of rendering the whole tree.
         // It may still render the whole tree or it may just render a portion or just return JSON
         if ($execMethodName) { // Used to test for null but it could easily be an empty string
             $out = $this->exec( $execMethodName, $execArgs );
         }else {
-            $this->initTemplate();
             $out = $this->template->render( $this->state, $this->childComponents );
             if (!( $out instanceof ViewComponentResponse )) {
                 throw new \Exception( get_class( $this->template ) . " returned invalid response. Should have been an instance of ViewComponentResponse" );
@@ -169,8 +169,8 @@ abstract class AbstractViewComponent
             }
         }
         if (!( $out instanceof ViewComponentResponse )) {
-            throw new \Exception( implode( ".",
-                    $methodName ) . " returned invalid response. Should have been an instance of ViewComponentResponse" );
+            $nameStr = is_array( $methodName )?implode( ".", $methodName ):$methodName;
+            throw new \Exception( $nameStr . " returned invalid response. Should have been an instance of ViewComponentResponse" );
         }
         return $out;
     }
