@@ -271,7 +271,7 @@ abstract class AbstractViewComponent
     }
 
     /**
-     * Using $this->state, optionally update state, optionally create child components via addOrUpdateChild().
+     * Using $props and $this->state, optionally update state, optionally create child components via addOrUpdateChild().
      * @param array $props
      * @return void
      */
