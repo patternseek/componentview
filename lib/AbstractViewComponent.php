@@ -25,6 +25,16 @@ abstract class AbstractViewComponent
      */
     public $exec;
     /**
+     * Message to display when rendering component. Won't be serialised to will only be displayed once.
+     * @var string
+     */
+    public $flashMessage;
+    /**
+     * Error to display when rendering component. Won't be serialised to will only be displayed once.
+     * @var string
+     */
+    public $flashError;
+    /**
      * @var ViewState An object containing state elements
      */
     protected $state;
@@ -206,6 +216,22 @@ abstract class AbstractViewComponent
             }
         }
         $this->updatedChildren = [ ];
+    }
+
+    /**
+     * @param $string
+     */
+    public function setFlashMessage( $string )
+    {
+        $this->flashMessage = $string;
+    }
+
+    /**
+     * @param $string
+     */
+    public function setFlashError( $string )
+    {
+        $this->flashError = $string;
     }
 
     /**
