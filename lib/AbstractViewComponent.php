@@ -198,7 +198,7 @@ abstract class AbstractViewComponent
     public function getExecPath( $execMethod )
     {
         $path = $this->getPath();
-        return ( $path == null?$execMethod:$path . '.' . $execMethod );
+        return ( $path === null?$execMethod:$path . '.' . $execMethod );
     }
 
     /**
@@ -216,23 +216,6 @@ abstract class AbstractViewComponent
     public function updateProps( $props = [ ] )
     {
         $this->props = $props;
-    }
-
-    /**
-     *
-     */
-    private function updateState(){
-        // doUpdateState() creates/updates children via addOrUpdateChild()
-        $this->doUpdateState( $this->props );
-        // Prune children no longer in use.
-        // They are marked as in use by addOrUpdateChild()
-        // which implementing classes call from doUpdateState()
-        foreach (array_keys( $this->childComponents ) as $handle) {
-            if (!$this->updatedChildren[ $handle ]) {
-                unset( $this->childComponents[ $handle ] );
-            }
-        }
-        $this->updatedChildren = [ ];
     }
 
     /**
@@ -309,7 +292,7 @@ abstract class AbstractViewComponent
             $child = $this->childComponents[ $handle ];
         }
         $child->updateProps( $props );
-        $this->childComponentOutputs[$handle] = $child->render()->content;
+        $this->childComponentOutputs[ $handle ] = $child->render()->content;
         $this->updatedChildren[ $handle ] = true;
         return $this->childComponents[ $handle ];
     }
@@ -439,5 +422,23 @@ abstract class AbstractViewComponent
                 }
             }
         }
+    }
+
+    /**
+     *
+     */
+    private function updateState()
+    {
+        // doUpdateState() creates/updates children via addOrUpdateChild()
+        $this->doUpdateState( $this->props );
+        // Prune children no longer in use.
+        // They are marked as in use by addOrUpdateChild()
+        // which implementing classes call from doUpdateState()
+        foreach (array_keys( $this->childComponents ) as $handle) {
+            if (!$this->updatedChildren[ $handle ]) {
+                unset( $this->childComponents[ $handle ] );
+            }
+        }
+        $this->updatedChildren = [ ];
     }
 }
