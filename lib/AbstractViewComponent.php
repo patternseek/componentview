@@ -65,6 +65,11 @@ abstract class AbstractViewComponent
     protected $template;
 
     /**
+     * @var array The view's properties
+     */
+    protected $props;
+
+    /**
      * @param null $handle
      * @param AbstractViewComponent $parent
      * @param array $initConfig
@@ -128,7 +133,7 @@ abstract class AbstractViewComponent
     }
 
     /**
-     * Entry point for rendering a component tree. Call update() first.
+     * Entry point for rendering a component tree. Call updateProps() first.
      * @param string|null $execMethodName An optional method on this or a subcomponent to execute before rendering
      * @param array|null $execArgs
      * @throws \Exception
@@ -139,6 +144,7 @@ abstract class AbstractViewComponent
         // Test state
         $this->state->validate();
         $this->initTemplate();
+        $this->updateState();
 
         // If we're called with an 'exec' then run it instead of rendering the whole tree.
         // It may still render the whole tree or it may just render a portion or just return JSON
@@ -200,14 +206,20 @@ abstract class AbstractViewComponent
     }
 
     /**
-     * Entry point for building or updating a tree. Call before render() when instantiating the component tree.
      * @param $props
      * @throws \Exception
      */
-    public function update( $props = [ ] )
+    public function updateProps( $props = [ ] )
     {
-        // doUpdate() creates/updates children via addOrUpdateChild()
-        $this->doUpdate( $props );
+        $this->props = $props;
+    }
+
+    /**
+     *
+     */
+    private function updateState(){
+        // doUpdateState() creates/updates children via addOrUpdateChild()
+        $this->doUpdateState( $this->props );
 
         // Prune children no longer in use
         foreach (array_keys( $this->childComponents ) as $handle) {
@@ -291,7 +303,7 @@ abstract class AbstractViewComponent
         }else {
             $child = $this->childComponents[ $handle ];
         }
-        $child->update( $props );
+        $child->updateProps( $props );
         $this->updatedChildren[ $handle ] = true;
         return $this->childComponents[ $handle ];
     }
@@ -301,11 +313,11 @@ abstract class AbstractViewComponent
      * @param array $props
      * @return void
      */
-    abstract protected function doUpdate( $props );
+    abstract protected function doUpdateState( $props );
 
     /**
      * testInputs() compares a set of named inputs (props or args) in the associative array $inputs with an input specification.
-     * It MUST be used by implementations' doUpdate() and *Handler() methods to verify their input.
+     * It MUST be used by implementations' doUpdateState() and *Handler() methods to verify their input.
      *
      * $inputSpec is an array describing allowed inputs with a similar design to php method sigs.
      * The keys are field names, the values are 0 to 2 entry arrays with the following entries: [type,default].

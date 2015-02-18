@@ -50,7 +50,7 @@ class AbstractViewComponentTest extends \PHPUnit_Framework_TestCase {
         $view = new HelloViewComponent( null, null, $props );
         $view->execFormHelper = function (){
         };
-        $view->update();
+        $view->updateProps();
         $outObj = $view->render();
 
 #        print_r( $out );
@@ -100,7 +100,7 @@ EOS;
                 #'SomeClassWithPrebuiltDefault'=>,
             ];
         $view = new HelloViewComponent( null, null, $props );
-        $view->update();
+        $view->updateProps();
         $outObj = $view->render( "world.jsonMultiply", ['multiplier'=>3] ); // Multiplies multiplier * props['intRequired']
         $expected = json_encode( ['result'=>12 ] );
         $this->assertEquals( $expected, $outObj->content );
@@ -130,13 +130,13 @@ EOS;
                 #'SomeClassWithPrebuiltDefault'=>,
             ];
         $view = new HelloViewComponent( null, null, $props );
-        $view->update();
+        $view->updateProps();
         $outObj = $view->render( "world.setState", ['something'=>5] ); // Multiplies multiplier * props['intRequired']
         $this->assertEquals( "OK", $outObj->content );
         $viewSer = serialize( $view );
         // Next page
         $view = unserialize( $viewSer );
-        $view->update();
+        $view->updateProps();
         $outObj = $view->render( "world.getState" ); // Multiplies multiplier * props['intRequired']
         $this->assertEquals( 5, $outObj->content );
     }
@@ -166,7 +166,7 @@ EOS;
                 #'SomeClassWithPrebuiltDefault'=>,
             ];
         $view = new HelloViewComponent( null, null, $props );
-        $view->update();
+        $view->updateProps();
 
         // Optional on
         $props =
@@ -191,7 +191,7 @@ EOS;
                 'SomeClassWithPrebuiltDefault'=>new SomeClass(),
             ];
         $view = new HelloViewComponent( null, null, $props );
-        $view->update();
+        $view->updateProps();
 
 
         // Failures
@@ -800,7 +800,7 @@ EOS;
 
         try{
             $view = new HelloViewComponent( null, null, $props );
-            $view->update();
+            $view->updateProps();
         }catch ( \Exception $e ){
             $this->assertTrue( true );
             return;
