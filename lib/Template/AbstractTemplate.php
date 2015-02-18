@@ -40,13 +40,13 @@ abstract class AbstractTemplate{
 
     /**
      *
-     * @param array $props
-     * @param AbstractViewComponent[] $components
+     * @param ViewState $state
+     * @param array $componentOutputs
      * @return string
      */
-    public function render( ViewState $state, array $components )
+    public function render( ViewState $state, array $componentOutputs )
     {
-        return $this->doRender( $state, $components );
+        return $this->doRender( $state, $componentOutputs );
     }
 
     /**

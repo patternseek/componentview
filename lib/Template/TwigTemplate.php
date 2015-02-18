@@ -54,13 +54,13 @@ class TwigTemplate extends AbstractTemplate{
      * @param \PatternSeek\ComponentView\AbstractViewComponent[] $components
      * @return string
      */
-    protected function doRender( ViewState $state, array $components )
+    protected function doRender( ViewState $state, array $componentOutputs )
     {
 
         // This is defined here as this is where $components is available. It would be better in the superclass.
         $componentRenderFunc =
-            function( $name ) use ($components){
-                return $components[$name]->render()->content;
+            function( $name ) use ($componentOutputs){
+                return $componentOutputs[$name];
             };
 
         $this->twig->addFunction('component', new \Twig_Function_Function( $componentRenderFunc ));
@@ -70,7 +70,6 @@ class TwigTemplate extends AbstractTemplate{
             $this->templateString,
             [
                 'state' => $state,
-                'children' => $components,
                 'this' => $this->component,
                 'parent' => $this->component->getParent()
             ] );

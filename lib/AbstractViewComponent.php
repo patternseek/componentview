@@ -55,6 +55,11 @@ abstract class AbstractViewComponent
     protected $childComponents = [ ];
 
     /**
+     * @var string[]
+     */
+    protected $childComponentOutputs = [];
+
+    /**
      * @var boolean[] Used to track which children are updated when update() is called. Those that aren't are pruned.
      */
     protected $updatedChildren = [ ];
@@ -150,7 +155,7 @@ abstract class AbstractViewComponent
         if ($execMethodName) { // Used to test for null but it could easily be an empty string
             $out = $this->exec( $execMethodName, $execArgs );
         }else {
-            $out = $this->template->render( $this->state, $this->childComponents );
+            $out = $this->template->render( $this->state, $this->childComponentOutputs );
             if (!( $out instanceof ViewComponentResponse )) {
                 throw new \Exception( get_class( $this->template ) . " returned invalid response. Should have been an instance of ViewComponentResponse" );
             }
@@ -219,8 +224,9 @@ abstract class AbstractViewComponent
     private function updateState(){
         // doUpdateState() creates/updates children via addOrUpdateChild()
         $this->doUpdateState( $this->props );
-
-        // Prune children no longer in use
+        // Prune children no longer in use.
+        // They are marked as in use by addOrUpdateChild()
+        // which implementing classes call from doUpdateState()
         foreach (array_keys( $this->childComponents ) as $handle) {
             if (!$this->updatedChildren[ $handle ]) {
                 unset( $this->childComponents[ $handle ] );
@@ -303,6 +309,7 @@ abstract class AbstractViewComponent
             $child = $this->childComponents[ $handle ];
         }
         $child->updateProps( $props );
+        $this->childComponentOutputs[$handle] = $child->render()->content;
         $this->updatedChildren[ $handle ] = true;
         return $this->childComponents[ $handle ];
     }

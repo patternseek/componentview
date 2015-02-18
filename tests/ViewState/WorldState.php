@@ -35,9 +35,9 @@ class WorldState extends ViewState
     public $name;
 
     /**
-     * @var string
+     * @var integer
      *
-     * @Assert\Type(type="string")
+     * @Assert\Type(type="integer")
      */
     public $testProp;
 
