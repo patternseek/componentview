@@ -141,10 +141,9 @@ abstract class AbstractViewComponent
      */
     public function render( $execMethodName = null, array $execArgs = null )
     {
-        // Test state
-        $this->state->validate();
         $this->initTemplate();
         $this->updateState();
+        $this->state->validate();
 
         // If we're called with an 'exec' then run it instead of rendering the whole tree.
         // It may still render the whole tree or it may just render a portion or just return JSON
