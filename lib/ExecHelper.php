@@ -43,15 +43,19 @@ class ExecHelper
      * @param string $method
      * @param string $formBody The body of an HTML form to be wrapped
      * @param bool $onlyComponentOutput
+     * @param null $formID
      * @return string HTML form
      */
-    public function wrapForm( $execMethod, $method, $formBody, $onlyComponentOutput = false )
+    public function wrapForm( $execMethod, $method, $formBody, $onlyComponentOutput = false, $formID = null )
     {
         if ($onlyComponentOutput) {
             //...
         }
+        if (null !== $formID) {
+            $formID = " id='{$formID}'";
+        }
         return <<<EOS
-<form method="{$method}" action="">
+<form method="{$method}" action=""{$formID}>
     <input type="hidden" name="exec" value="{$this->component->getExecPath( $execMethod )}">
     {$formBody}
 </form>
@@ -91,6 +95,41 @@ EOS;
             };
         </script>
         <a href="#" onclick="httpRequest.open('GET', '{$url}', true);httpRequest.send(null);return false;" {$attrsStr}>{$linkText}</a>
+EOS;
+    }
+
+    /**
+     * Generate a form which replaces the content of a DOM element with the output of an exec method
+     * @param $execMethod
+     * @param $method
+     * @param string $formBody The body of an HTML form to be wrapped
+     * @param $targetDiv
+     * @param $formID
+     * @return string
+     */
+    public function replaceElementUsingForm( $execMethod, $method, $formBody, $targetDiv, $formID )
+    {
+        $attrs = [ ];
+        return <<<EOS
+        {$this->wrapForm( $execMethod, $method, $formBody, true, $formID )}
+        <script type="application/javascript">
+            var httpRequest = new XMLHttpRequest();
+            httpRequest.onreadystatechange = function(){
+                if (httpRequest.readyState === 4) {
+                    if (httpRequest.status === 200) {
+                        document.getElementById( "{$targetDiv}" ).innerHTML = httpRequest.responseText;
+                    } else {
+                        // ... Failed
+                    }
+                } else {
+                    // still not ready
+                }
+            };
+            var form = document.getElementById( '{$formID}' );
+            var data  = new FormData(form);
+            httpRequest.open('POST', document.URL);
+            httpRequest.send(data);
+        </script>
 EOS;
     }
 }
