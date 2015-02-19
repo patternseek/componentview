@@ -109,7 +109,6 @@ EOS;
      */
     public function replaceElementUsingForm( $execMethod, $method, $formBody, $targetDiv, $formID )
     {
-        $attrs = [ ];
         return <<<EOS
         {$this->wrapForm( $execMethod, $method, $formBody, true, $formID )}
         <script type="application/javascript">
@@ -127,8 +126,12 @@ EOS;
             };
             var form = document.getElementById( '{$formID}' );
             var data  = new FormData(form);
-            httpRequest.open('POST', document.URL);
-            httpRequest.send(data);
+            form.addEventListener("submit", function (event) {
+                event.preventDefault();
+                httpRequest.open('POST', document.URL);
+                httpRequest.send(data);
+              });
+
         </script>
 EOS;
     }
