@@ -27,9 +27,10 @@ class ExecHelper
      * Generate and return an appropriate URL or URI to call the exec handler identified by $execPath with $args
      * @param string $execMethod Component hierarchy path to an exec handler function on a component
      * @param array $args Arguments to be passed to the called handler
+     * @param bool $onlyComponentOutput
      * @return string A URL or URI
      */
-    public function url( $execMethod, $args = [ ] )
+    public function url( $execMethod, $args = [ ], $onlyComponentOutput = false )
     {
         $args[ 'exec' ] = $this->component->getExecPath( $execMethod );
         $qs = http_build_query( $args );
@@ -41,10 +42,14 @@ class ExecHelper
      * @param string $execMethod Component hierarchy path to an exec handler function on a component
      * @param string $method
      * @param string $formBody The body of an HTML form to be wrapped
+     * @param bool $onlyComponentOutput
      * @return string HTML form
      */
-    public function wrapForm( $execMethod, $method, $formBody )
+    public function wrapForm( $execMethod, $method, $formBody, $onlyComponentOutput = false )
     {
+        if ($onlyComponentOutput) {
+            //...
+        }
         return <<<EOS
 <form method="{$method}" action="">
     <input type="hidden" name="exec" value="{$this->component->getExecPath( $execMethod )}">
@@ -64,7 +69,7 @@ EOS;
      */
     public function replaceElementUsingLink( $execMethod, $args = [ ], $targetDiv, $linkText, $anchorAttrs = [ ] )
     {
-        $url = $this->url( $execMethod, $args );
+        $url = $this->url( $execMethod, $args, true );
         $attrs = [ ];
         foreach ($anchorAttrs as $k => $v) {
             $attrs[ ] = "{$k}='{$v}'";
