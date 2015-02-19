@@ -32,6 +32,9 @@ class ExecHelper
      */
     public function url( $execMethod, $args = [ ], $onlyComponentOutput = false )
     {
+        if ($onlyComponentOutput) {
+            //...
+        }
         $args[ 'exec' ] = $this->component->getExecPath( $execMethod );
         $qs = http_build_query( $args );
         return "?{$qs}";
