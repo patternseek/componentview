@@ -35,6 +35,11 @@ abstract class AbstractViewComponent
      */
     public $flashError;
     /**
+     * If we have a parent in $parent, $handle is the parent's handle/identifier for us
+     * @var string
+     */
+    public $handle;
+    /**
      * @var ViewState An object containing state elements
      */
     protected $state;
@@ -42,13 +47,6 @@ abstract class AbstractViewComponent
      * @var AbstractViewComponent
      */
     protected $parent;
-
-    /**
-     * If we have a parent in $parent, $handle is the parent's handle/identifier for us
-     * @var string
-     */
-    protected $handle;
-
     /**
      * @var AbstractViewComponent[]
      */
