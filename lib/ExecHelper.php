@@ -52,4 +52,40 @@ class ExecHelper
 </form>
 EOS;
     }
+
+    /**
+     * Generate a link which replaces the content of a DOM element with the output of an exec method
+     * @param $execMethod
+     * @param array $args
+     * @param $targetDiv
+     * @param $linkText
+     * @param array $anchorAttrs
+     * @return string
+     */
+    public function replaceElementUsingLink( $execMethod, $args = [ ], $targetDiv, $linkText, $anchorAttrs = [ ] )
+    {
+        $url = $this->url( $execMethod, $args );
+        $attrs = [ ];
+        foreach ($anchorAttrs as $k => $v) {
+            $attrs[ ] = "{$k}='{$v}'";
+        }
+        $attrsStr = implode( ' ', $attrs );
+        return <<<EOS
+        <script type="application/javascript">
+            var httpRequest = new XMLHttpRequest();
+            httpRequest.onreadystatechange = function(){
+                if (httpRequest.readyState === 4) {
+                    if (httpRequest.status === 200) {
+                        document.getElementById( "{$targetDiv}" ).innerHTML = httpRequest.responseText;
+                    } else {
+                        // ... Failed
+                    }
+                } else {
+                    // still not ready
+                }
+            };
+        </script>
+        <a href="#" onclick="httpRequest.open('GET', '{$url}', true);httpRequest.send(null);return false;" {$attrsStr}>{$linkText}</a>
+EOS;
+    }
 }
