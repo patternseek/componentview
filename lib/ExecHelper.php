@@ -44,9 +44,17 @@ class ExecHelper
      * @param string $formBody The body of an HTML form to be wrapped
      * @param bool $onlyComponentOutput
      * @param null $formID
+     * @param null $onSubmit
      * @return string HTML form
      */
-    public function wrapForm( $execMethod, $method, $formBody, $onlyComponentOutput = false, $formID = null )
+    public function wrapForm(
+        $execMethod,
+        $method,
+        $formBody,
+        $onlyComponentOutput = false,
+        $formID = null,
+        $onSubmit = null
+    )
     {
         if ($onlyComponentOutput) {
             //...
@@ -54,8 +62,11 @@ class ExecHelper
         if (null !== $formID) {
             $formID = " id='{$formID}'";
         }
+        if (null !== $onSubmit) {
+            $onSubmit = " onsubmit='{$onSubmit}'";
+        }
         return <<<EOS
-<form method="{$method}" action=""{$formID}>
+<form method="{$method}" action=""{$formID}{$onSubmit}>
     <input type="hidden" name="exec" value="{$this->component->getExecPath( $execMethod )}">
     {$formBody}
 </form>
@@ -81,20 +92,31 @@ EOS;
         $attrsStr = implode( ' ', $attrs );
         return <<<EOS
         <script type="application/javascript">
-            var httpRequest = new XMLHttpRequest();
-            httpRequest.onreadystatechange = function(){
-                if (httpRequest.readyState === 4) {
-                    if (httpRequest.status === 200) {
-                        document.getElementById( "{$targetDiv}" ).innerHTML = httpRequest.responseText;
-                    } else {
-                        // ... Failed
-                    }
-                } else {
-                    // still not ready
+            if( typeof(execLink) != "function" ){
+                var execLink = function( url, targetDiv ){
+                    var httpRequest = new XMLHttpRequest();
+                    httpRequest.onreadystatechange = function(){
+                        if (httpRequest.readyState === 4) {
+                            if (httpRequest.status === 200) {
+                                /* var repl = document.getElementById( targetDiv );
+                                repl.innerHTML = httpRequest.responseText;
+                                repl.parentNode.replaceChild( repl.firstChild, repl );
+                                */
+                                $( "#"+targetDiv ).replaceWith( httpRequest.responseText );
+                                /* $( "#"+targetDiv ).replaceWith( $( "#"+targetDiv ).firstChild ) */
+                            } else {
+                                // ... Failed
+                            }
+                        } else {
+                            // still not ready
+                        }
+                    };
+                    httpRequest.open('GET', url, true);
+                    httpRequest.send(null);return false;
                 }
-            };
+            }
         </script>
-        <a href="#" onclick="httpRequest.open('GET', '{$url}', true);httpRequest.send(null);return false;" {$attrsStr}>{$linkText}</a>
+        <a href="#" onclick="execLink( '{$url}', '{$targetDiv}' ); return false;" {$attrsStr}>{$linkText}</a>
 EOS;
     }
 
@@ -110,28 +132,33 @@ EOS;
     public function replaceElementUsingForm( $execMethod, $method, $formBody, $targetDiv, $formID )
     {
         return <<<EOS
-        {$this->wrapForm( $execMethod, $method, $formBody, true, $formID )}
+        {$this->wrapForm( $execMethod, $method, $formBody, true, $formID,
+            "execForm( this, \"{$targetDiv}\" ); return false;" )}
         <script type="application/javascript">
-            var httpRequest = new XMLHttpRequest();
-            httpRequest.onreadystatechange = function(){
-                if (httpRequest.readyState === 4) {
-                    if (httpRequest.status === 200) {
-                        document.getElementById( "{$targetDiv}" ).innerHTML = httpRequest.responseText;
+        if( typeof(execForm) != "function" ){
+            var execForm = function( form, targetDiv ){
+                var httpRequest = new XMLHttpRequest();
+                httpRequest.onreadystatechange = function(){
+                    if (httpRequest.readyState === 4) {
+                        if (httpRequest.status === 200) {
+                            /* var repl = document.getElementById( targetDiv );
+                                repl.innerHTML = httpRequest.responseText;
+                                repl.parentNode.replaceChild( repl.firstChild, repl );
+                                */
+                                $( "#"+targetDiv ).replaceWith( httpRequest.responseText );
+                                /* $( "#"+targetDiv ).replaceWith( $( "#"+targetDiv ).firstChild ) */
+                        } else {
+                            // ... Failed
+                        }
                     } else {
-                        // ... Failed
+                        // still not ready
                     }
-                } else {
-                    // still not ready
-                }
-            };
-            var form = document.getElementById( '{$formID}' );
-            var data  = new FormData(form);
-            form.addEventListener("submit", function (event) {
-                event.preventDefault();
+                };
+                var data  = new FormData(form);
                 httpRequest.open('POST', document.URL);
                 httpRequest.send(data);
-              });
-
+            }
+        }
         </script>
 EOS;
     }
