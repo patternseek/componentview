@@ -345,12 +345,10 @@ abstract class AbstractViewComponent
                     throw new \Exception( $fieldName . " is a required field for " . get_class( $this ) );
                 }
             }
-
             // Set default is unset
             if (!isset( $inputs[ $fieldName ] )) {
                 $inputs[ $fieldName ] = $fieldSpec[ 1 ];
             }
-
             // Check type
             // Any type allowed, continue
             if (!isset( $fieldSpec[ 0 ] ) || $fieldSpec[ 0 ] === null) {
@@ -365,55 +363,35 @@ abstract class AbstractViewComponent
                 switch ($requiredType) {
                     case "boolean":
                     case "bool":
-                        if (is_bool( $input )) {
-                            $failed = false;
-                        }
+                    $failed = !is_bool( $input );
                         break;
                     case "integer":
                     case "int":
-                        if (is_int( $input )) {
-                            $failed = false;
-                        }
+                    $failed = !is_int( $input );
                         break;
                     case "double":
-                        if (is_double( $input )) {
-                            $failed = false;
-                        }
+                        $failed = !is_double( $input );
                         break;
                     case "float":
-                        if (is_float( $input )) {
-                            $failed = false;
-                        }
+                        $failed = !is_float( $input );
                         break;
                     case "string":
-                        if (is_string( $input )) {
-                            $failed = false;
-                        }
+                        $failed = !is_string( $input );
                         break;
                     case "array":
-                        if (is_array( $input )) {
-                            $failed = false;
-                        }
+                        $failed = !is_array( $input );
                         break;
                     case "object":
-                        if (is_object( $input )) {
-                            $failed = false;
-                        }
+                        $failed = !is_object( $input );
                         break;
                     case "resource":
-                        if (is_resource( $input )) {
-                            $failed = false;
-                        }
+                        $failed = !is_resource( $input );
                         break;
                     case "callable":
-                        if (is_callable( $input )) {
-                            $failed = false;
-                        }
+                        $failed = !is_callable( $input );
                         break;
                     default:
-                        if (get_class( $input ) == $requiredType) {
-                            $failed = false;
-                        }
+                        $failed = !( get_class( $input ) == $requiredType );
                 }
                 if ($failed) {
                     throw new \Exception( $fieldName . " should be of type " . $requiredType );
