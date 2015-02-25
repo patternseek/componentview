@@ -13,7 +13,7 @@
     "require": {
         "php": ">=5.3.3",
         "twig/twig": "1.17.0",
-        "patternseek/structclass": "dev-master",
+        "patternseek/structclass": "dev-master"
     },
     "require-dev": {
         "phpunit/phpunit": "4.0.*"
