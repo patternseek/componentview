@@ -106,9 +106,11 @@ EOS;
                                 repl.parentNode.replaceChild( repl.firstChild, repl );
                                 */
                                 $( "#"+targetDiv ).replaceWith( httpRequest.responseText );
+                                $("body").css("cursor", "default");
                                 /* $( "#"+targetDiv ).replaceWith( $( "#"+targetDiv ).firstChild ) */
                             } else {
                                 // ... Failed
+                                $("body").css("cursor", "default");
                             }
                         } else {
                             // still not ready
@@ -116,6 +118,7 @@ EOS;
                     };
                     httpRequest.open('GET', url, true);
                     httpRequest.send(null);return false;
+                    $("body").css("cursor", "progress");
                 }
             }
         </script>
@@ -149,9 +152,11 @@ EOS;
                                 repl.parentNode.replaceChild( repl.firstChild, repl );
                                 */
                                 $( "#"+targetDiv ).replaceWith( httpRequest.responseText );
+                                $("body").css("cursor", "default");
                                 /* $( "#"+targetDiv ).replaceWith( $( "#"+targetDiv ).firstChild ) */
                         } else {
                             // ... Failed
+                            $("body").css("cursor", "default");
                         }
                     } else {
                         // still not ready
@@ -160,6 +165,7 @@ EOS;
                 var data  = new FormData(form);
                 httpRequest.open('POST', document.URL);
                 httpRequest.send(data);
+                $("body").css("cursor", "progress");
             }
         }
         </script>
