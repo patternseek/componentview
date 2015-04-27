@@ -30,11 +30,9 @@ class ExecHelper
      * @param bool $onlyComponentOutput
      * @return string A URL or URI
      */
-    public function url( $execMethod, $args = [ ], $onlyComponentOutput = false )
+    public function url( $execMethod, $args = [ ], $onlyComponentOutput = false ) // $onlyComponentOutput Not used in this implementation but necessary for subclasses
     {
-        if ($onlyComponentOutput) {
-            //...
-        }
+        // $onlyComponentOutput is not used in this implementation but may be by sub-classes
         $args[ 'exec' ] = $this->component->getExecPath( $execMethod );
         $qs = http_build_query( $args );
         return "?{$qs}";
@@ -54,14 +52,12 @@ class ExecHelper
         $execMethod,
         $method,
         $formBody,
-        $onlyComponentOutput = false,
+        $onlyComponentOutput = false, // Not used in this implementation but necessary for subclasses
         $formID = null,
         $onSubmit = null
     )
     {
-        if ($onlyComponentOutput) {
-            //...
-        }
+        // $onlyComponentOutput is not used in this implementation but may be by sub-classes
         if (null !== $formID) {
             $formID = " id='{$formID}'";
         }
@@ -101,15 +97,10 @@ EOS;
                     httpRequest.onreadystatechange = function(){
                         if (httpRequest.readyState === 4) {
                             if (httpRequest.status === 200) {
-                                /* var repl = document.getElementById( targetDiv );
-                                repl.innerHTML = httpRequest.responseText;
-                                repl.parentNode.replaceChild( repl.firstChild, repl );
-                                */
                                 $( "#"+targetDiv ).replaceWith( httpRequest.responseText );
                                 $("body").css("cursor", "default");
-                                /* $( "#"+targetDiv ).replaceWith( $( "#"+targetDiv ).firstChild ) */
                             } else {
-                                // ... Failed
+                                // Failed
                                 $("body").css("cursor", "default");
                             }
                         } else {
