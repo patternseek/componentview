@@ -2,7 +2,7 @@
 namespace PatternSeek\ComponentView\Test\Component;
 
 use PatternSeek\ComponentView\AbstractViewComponent;
-use PatternSeek\ComponentView\Template\TwigTemplate;
+use PatternSeek\ComponentView\Template\TwigTemplateString;
 use PatternSeek\ComponentView\Test\ViewState\WorldState;
 use PatternSeek\ComponentView\ViewComponentResponse;
 
@@ -103,6 +103,6 @@ Exec URL: {{this.exec.url( 'someExec', {'a':1} )}}
 Exec Form:
 {{ this.exec.wrapForm( 'otherExec', 'POST', formBody ) }}
 EOS;
-        $this->template = new TwigTemplate( $this, $tplTwig );
+        $this->template = new TwigTemplateString( $this, $tplTwig );
     }
 }
