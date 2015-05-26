@@ -21,7 +21,7 @@ use Twig_Loader_String;
  * Class TwigTemplateString
  * @package PatternSeek\ComponentView
  */
-class TwigTemplateString extends AbstractTwigTemplate{
+class TwigTemplatePuli extends AbstractTwigTemplate{
 
     /**
      * @param AbstractViewComponent $component
@@ -33,6 +33,9 @@ class TwigTemplateString extends AbstractTwigTemplate{
         parent::__construct( $component, $templateNameOrContents );
     }
 
+    /**
+     * @param array $componentOutputs
+     */
     protected function addToTwig( array $componentOutputs ){
         $this->twig->addExtension(new PuliExtension($this->repo));
         parent::addToTwig( $componentOutputs );
