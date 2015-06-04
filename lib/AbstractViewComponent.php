@@ -391,7 +391,7 @@ abstract class AbstractViewComponent
                         $failed = !is_callable( $input );
                         break;
                     default:
-                        $failed = !( get_class( $input ) == $requiredType );
+                        $failed = !( $input instanceof $requiredType );
                 }
                 if ($failed) {
                     throw new \Exception( $fieldName . " should be of type " . $requiredType );
