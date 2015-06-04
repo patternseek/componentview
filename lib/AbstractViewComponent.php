@@ -97,9 +97,6 @@ abstract class AbstractViewComponent
         $this->exec = clone $execHelper;
         $this->exec->setComponent( $this );
 
-        // Set up the template
-        $this->initTemplate();
-
         // Set up the state container
         $this->initState();
 
