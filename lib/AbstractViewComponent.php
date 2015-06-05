@@ -141,9 +141,9 @@ abstract class AbstractViewComponent
      */
     public function render( $execMethodName = null, array $execArgs = null )
     {
-        $this->initTemplate();
         $this->updateState();
         $this->state->validate();
+        $this->initTemplate();
 
         // If we're called with an 'exec' then run it instead of rendering the whole tree.
         // It may still render the whole tree or it may just render a portion or just return JSON
@@ -230,7 +230,8 @@ abstract class AbstractViewComponent
     }
 
     /**
-     * Load or configure the component's template as necessary
+     * Load or configure the component's template as necessary.
+     * Called just before the template is used so can depend on $this->state to select template.
      *
      * @return void
      */
