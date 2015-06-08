@@ -125,11 +125,8 @@ abstract class AbstractViewComponent
      */
     public function renderRoot()
     {
-        $cur = $this;
-        while ($cur->parent !== null) {
-            $cur = $cur->parent;
-        }
-        return $cur->render();
+        $root = $this->getRootComponent();
+        return $root->render();
     }
 
     /**
@@ -227,6 +224,20 @@ abstract class AbstractViewComponent
     public function setFlashError( $string )
     {
         $this->flashError = $string;
+    }
+
+    /**
+     * Get the root component of the hierarchy
+     *
+     * @return AbstractViewComponent
+     */
+    public function getRootComponent()
+    {
+        $cur = $this;
+        while ($cur->parent !== null) {
+            $cur = $cur->parent;
+        }
+        return $cur;
     }
 
     /**
