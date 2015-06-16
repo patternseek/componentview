@@ -293,6 +293,9 @@ abstract class AbstractViewComponent
     protected function addOrUpdateChild( $handle, $type, $props, array $initConfig = null )
     {
         if (!isset( $this->childComponents[ $handle ] )) {
+            if( ! class_exists( $type ) ){
+                throw new \Exception( "Class '{$type}' for sub-component  does not exist." );
+            }
             $child = new $type( $handle, $this, $initConfig, $this->exec );
             $this->childComponents[ $handle ] = $child;
         }else {
