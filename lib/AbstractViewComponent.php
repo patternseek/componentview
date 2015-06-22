@@ -94,8 +94,7 @@ abstract class AbstractViewComponent
             $execHelper = new ExecHelper();
         }
 
-        $this->exec = clone $execHelper;
-        $this->exec->setComponent( $this );
+        $this->setExec( $execHelper );
 
         // Set up the state container
         $this->initState();
@@ -105,16 +104,36 @@ abstract class AbstractViewComponent
     }
 
     /**
+     * User this to serialise ViewComponents as extra steps may be added later.
+     * @return string
+     */
+    public function dehydrate(){
+        return serialize( $this );
+    }
+
+    /**
+     * Use this to unserialise ViewComponents
+     * @param $serialised
+     * @param ExecHelper $execHelper
+     */
+    public static function rehydrate( $serialised, ExecHelper $execHelper ){
+        /** @var AbstractViewComponent $view */
+        $view = unserialize( $serialised );
+        $view->setExec( $execHelper );
+        return $view;
+    }
+
+    /**
      * @return array
      */
-    function __sleep()
+    public function __sleep()
     {
         return [
             'childComponents',
             'handle',
             'parent',
-            'state',
-            'exec'
+            'state'/*,
+            'exec'*/
         ];
     }
 
@@ -145,7 +164,7 @@ abstract class AbstractViewComponent
         // If we're called with an 'exec' then run it instead of rendering the whole tree.
         // It may still render the whole tree or it may just render a portion or just return JSON
         if ($execMethodName) { // Used to test for null but it could easily be an empty string
-            $out = $this->exec( $execMethodName, $execArgs );
+            $out = $this->execMethod( $execMethodName, $execArgs );
         }else {
             $out = $this->template->render( $this->state, $this->childComponentOutputs );
             if (!( $out instanceof ViewComponentResponse )) {
@@ -163,7 +182,7 @@ abstract class AbstractViewComponent
      * @throws \Exception
      * @return ViewComponentResponse
      */
-    public function exec( $methodName, array $args = null )
+    public function execMethod( $methodName, array $args = null )
     {
         if (!is_array( $methodName )) {
             $methodName = explode( '.', $methodName );
@@ -175,7 +194,7 @@ abstract class AbstractViewComponent
             $childName = array_shift( $methodName );
             $child = $this->childComponents[ $childName ];
             if ($child instanceof AbstractViewComponent) {
-                $out = $child->exec( $methodName, $args );
+                $out = $child->execMethod( $methodName, $args );
             }else {
                 throw new \Exception( implode( ".", $methodName ) . " is not a valid method." );
             }
@@ -354,7 +373,11 @@ abstract class AbstractViewComponent
             // Required field
             if (( count( $fieldSpec ) < 2 )) {
                 if (!isset( $inputs[ $fieldName ] )) {
-                    throw new \Exception( $fieldName . " is a required field for " . get_class( $this ) );
+                    $callerFunc = debug_backtrace()[1]['function'];
+                    if( $this->parent !== null ){
+                        $parentText = " (parent component is ".get_class($this->parent).")";
+                    }
+                    throw new \Exception( $fieldName . " is a required field for " . get_class( $this )."::{$callerFunc}(){$parentText}" );
                 }
             }
             // Set default is unset
@@ -406,7 +429,11 @@ abstract class AbstractViewComponent
                         $failed = !( $input instanceof $requiredType );
                 }
                 if ($failed) {
-                    throw new \Exception( $fieldName . " should be of type " . $requiredType );
+                    $callerFunc = debug_backtrace()[1]['function'];
+                    if( $this->parent !== null ){
+                        $parentText = " (parent component is ".get_class($this->parent).")";
+                    }
+                    throw new \Exception( $fieldName . " should be of type " . $requiredType . "in " . get_class( $this )."::{$callerFunc}(){$parentText}" );
                 }
             }
         }
@@ -428,5 +455,17 @@ abstract class AbstractViewComponent
             }
         }
         $this->updatedChildren = [ ];
+    }
+
+    /**
+     * @param ExecHelper $execHelper
+     */
+    private function setExec( ExecHelper $execHelper )
+    {
+        $this->exec = clone $execHelper;
+        $this->exec->setComponent( $this );
+        foreach( $this->childComponents as $child ){
+            $child->setExec( $execHelper );
+        }
     }
 }

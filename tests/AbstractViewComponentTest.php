@@ -9,6 +9,8 @@
  */
 namespace PatternSeek\ComponentView\Test;
 
+use PatternSeek\ComponentView\AbstractViewComponent;
+use PatternSeek\ComponentView\ExecHelper;
 use PatternSeek\ComponentView\Test\Component\HelloViewComponent;
 
 /**
@@ -129,13 +131,14 @@ EOS;
                 #'SomeClassOptional'=>,
                 #'SomeClassWithPrebuiltDefault'=>,
             ];
-        $view = new HelloViewComponent( null, null, $props );
+        $execHelper = new ExecHelper();
+        $view = new HelloViewComponent( null, null, $props, $execHelper);
         $view->updateProps();
         $outObj = $view->render( "world.setState", ['something'=>5] ); // Multiplies multiplier * props['intRequired']
         $this->assertEquals( "OK", $outObj->content );
-        $viewSer = serialize( $view );
+        $viewSer = $view->dehydrate();
         // Next page
-        $view = unserialize( $viewSer );
+        $view = AbstractViewComponent::rehydrate( $viewSer, $execHelper );
         $view->updateProps();
         $outObj = $view->render( "world.getState" ); // Multiplies multiplier * props['intRequired']
         $this->assertEquals( 5, $outObj->content );
