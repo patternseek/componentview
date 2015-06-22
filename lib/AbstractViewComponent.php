@@ -373,11 +373,13 @@ abstract class AbstractViewComponent
             // Required field
             if (( count( $fieldSpec ) < 2 )) {
                 if (!isset( $inputs[ $fieldName ] )) {
-                    $callerFunc = debug_backtrace()[1]['function'];
+                    $calledFunc = debug_backtrace()[1]['function'];
+                    $callerFunc = debug_backtrace()[2]['function'];
+                    $callerClass = debug_backtrace()[2]['class'];
                     if( $this->parent !== null ){
                         $parentText = " (parent component is ".get_class($this->parent).")";
                     }
-                    throw new \Exception( $fieldName . " is a required field for " . get_class( $this )."::{$callerFunc}(){$parentText}" );
+                    throw new \Exception( $fieldName . " is a required field for " . get_class( $this )."::{$calledFunc}() called from {$callerClass}::{$callerFunc}(){$parentText}" );
                 }
             }
             // Set default is unset
@@ -429,11 +431,13 @@ abstract class AbstractViewComponent
                         $failed = !( $input instanceof $requiredType );
                 }
                 if ($failed) {
-                    $callerFunc = debug_backtrace()[1]['function'];
+                    $calledFunc = debug_backtrace()[1]['function'];
+                    $callerFunc = debug_backtrace()[2]['function'];
+                    $callerClass = debug_backtrace()[2]['class'];
                     if( $this->parent !== null ){
                         $parentText = " (parent component is ".get_class($this->parent).")";
                     }
-                    throw new \Exception( $fieldName . " should be of type " . $requiredType . "in " . get_class( $this )."::{$callerFunc}(){$parentText}" );
+                    throw new \Exception( $fieldName . " should be of type " . $requiredType . "in " . get_class( $this )."::{$calledFunc}() called from {$callerClass}::{$callerFunc}(){$parentText}" );
                 }
             }
         }
