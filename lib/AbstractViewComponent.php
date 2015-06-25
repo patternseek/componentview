@@ -12,6 +12,7 @@ namespace PatternSeek\ComponentView;
 
 use PatternSeek\ComponentView\Template\AbstractTemplate;
 use PatternSeek\ComponentView\ViewState\ViewState;
+use PatternSeek\DependencyInjector\DependencyInjector;
 
 /**
  * Class AbstractViewComponent
@@ -73,16 +74,23 @@ abstract class AbstractViewComponent
     protected $props;
 
     /**
+     * @var DependencyInjector
+     */
+    protected $dependencyInjector;
+
+    /**
      * @param null $handle
      * @param AbstractViewComponent $parent
      * @param array $initConfig
      * @param ExecHelper $execHelper
+     * @param DependencyInjector $di
      */
     public function __construct(
         $handle = null,
         AbstractViewComponent $parent = null,
         $initConfig = [ ],
-        ExecHelper $execHelper = null
+        ExecHelper $execHelper = null,
+        DependencyInjector $di = null
     ){
         // Null means we are root
         $this->parent = $parent;
@@ -93,8 +101,17 @@ abstract class AbstractViewComponent
         if (null === $execHelper) {
             $execHelper = new ExecHelper();
         }
-
         $this->setExec( $execHelper );
+        
+        // It's a little strange that the object injects its own
+        // dependencies but it means that callers don't need to do
+        // it manually and you still get the advantage that the deps
+        // are specified in the optional injectDependencies() method's
+        // signature
+        if( null !== $di ){
+            $this->dependencyInjector = $di;
+            $di->injectInto( $this, "injectDependencies" );
+        }
 
         // Set up the state container
         $this->initState();
@@ -115,6 +132,7 @@ abstract class AbstractViewComponent
      * Use this to unserialise ViewComponents
      * @param $serialised
      * @param ExecHelper $execHelper
+     * @return AbstractViewComponent
      */
     public static function rehydrate( $serialised, ExecHelper $execHelper ){
         /** @var AbstractViewComponent $view */
@@ -315,7 +333,7 @@ abstract class AbstractViewComponent
             if( ! class_exists( $type ) ){
                 throw new \Exception( "Class '{$type}' for sub-component  does not exist." );
             }
-            $child = new $type( $handle, $this, $initConfig, $this->exec );
+            $child = new $type( $handle, $this, $initConfig, $this->exec, $this->dependencyInjector );
             $this->childComponents[ $handle ] = $child;
         }else {
             $child = $this->childComponents[ $handle ];

@@ -12,6 +12,7 @@ namespace PatternSeek\ComponentView\Test;
 use PatternSeek\ComponentView\AbstractViewComponent;
 use PatternSeek\ComponentView\ExecHelper;
 use PatternSeek\ComponentView\Test\Component\HelloViewComponent;
+use PatternSeek\DependencyInjector\DependencyInjector;
 
 /**
  * Class SomeClass
