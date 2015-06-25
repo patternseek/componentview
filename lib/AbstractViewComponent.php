@@ -102,16 +102,8 @@ abstract class AbstractViewComponent
             $execHelper = new ExecHelper();
         }
         $this->setExec( $execHelper );
-        
-        // It's a little strange that the object injects its own
-        // dependencies but it means that callers don't need to do
-        // it manually and you still get the advantage that the deps
-        // are specified in the optional injectDependencies() method's
-        // signature
-        if( null !== $di ){
-            $this->dependencyInjector = $di;
-            $di->injectInto( $this, "injectDependencies" );
-        }
+
+        $this->setDependencyInjector( $di );
 
         // Set up the state container
         $this->initState();
@@ -132,12 +124,14 @@ abstract class AbstractViewComponent
      * Use this to unserialise ViewComponents
      * @param $serialised
      * @param ExecHelper $execHelper
+     * @param DependencyInjector $dependencyInjector Optional
      * @return AbstractViewComponent
      */
-    public static function rehydrate( $serialised, ExecHelper $execHelper ){
+    public static function rehydrate( $serialised, ExecHelper $execHelper, DependencyInjector $dependencyInjector = null ){
         /** @var AbstractViewComponent $view */
         $view = unserialize( $serialised );
         $view->setExec( $execHelper );
+        $view->setDependencyInjector( $dependencyInjector );
         return $view;
     }
 
@@ -488,6 +482,25 @@ abstract class AbstractViewComponent
         $this->exec->setComponent( $this );
         foreach( $this->childComponents as $child ){
             $child->setExec( $execHelper );
+        }
+    }
+
+    /**
+     * @param DependencyInjector $dependencyInjector
+     */
+    private function setDependencyInjector( DependencyInjector $dependencyInjector = null )
+    {
+        // It's a little strange that the object injects its own
+        // dependencies but it means that callers don't need to do
+        // it manually and you still get the advantage that the deps
+        // are specified in the optional injectDependencies() method's
+        // signature
+        if( null !== $dependencyInjector ){
+            $this->dependencyInjector = $dependencyInjector;
+            $this->dependencyInjector->injectInto( $this, "injectDependencies" );
+            foreach( $this->childComponents as $child ){
+                $child->setDependencyInjector( $dependencyInjector );
+            }
         }
     }
 }
