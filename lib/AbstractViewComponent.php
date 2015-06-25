@@ -13,6 +13,8 @@ namespace PatternSeek\ComponentView;
 use PatternSeek\ComponentView\Template\AbstractTemplate;
 use PatternSeek\ComponentView\ViewState\ViewState;
 use PatternSeek\DependencyInjector\DependencyInjector;
+use Psr\Log\LoggerInterface;
+use Psr\Log\LogLevel;
 
 /**
  * Class AbstractViewComponent
@@ -74,6 +76,11 @@ abstract class AbstractViewComponent
     protected $props;
 
     /**
+     * @var LoggerInterface
+     */
+    protected $logger;
+
+    /**
      * @var DependencyInjector
      */
     protected $dependencyInjector;
@@ -84,13 +91,15 @@ abstract class AbstractViewComponent
      * @param array $initConfig
      * @param ExecHelper $execHelper
      * @param DependencyInjector $di
+     * @param LoggerInterface $logger
      */
     public function __construct(
         $handle = null,
         AbstractViewComponent $parent = null,
         $initConfig = [ ],
         ExecHelper $execHelper = null,
-        DependencyInjector $di = null
+        DependencyInjector $di = null,
+        LoggerInterface $logger = null
     ){
         // Null means we are root
         $this->parent = $parent;
@@ -104,12 +113,28 @@ abstract class AbstractViewComponent
         $this->setExec( $execHelper );
 
         $this->setDependencyInjector( $di );
+        
+        $this->setLogger( $logger );
 
         // Set up the state container
         $this->initState();
 
+        $this->log( "Initialising with config: ".var_export( $initConfig, true ), LogLevel::DEBUG );
+        
         // Perform one-time init, if implemented by subclass
         $this->initComponent( $initConfig );
+    }
+
+    /**
+     * @param string $message
+     * @param string $level A constant from LogLevel
+     */
+    protected function log( $message, $level ){
+        if( isset( $this->logger ) ){
+            $class = get_class( $this );
+            $message = "[{$class}] {$message}";
+            $this->logger->log( $level, $message );
+        }
     }
 
     /**
@@ -117,6 +142,7 @@ abstract class AbstractViewComponent
      * @return string
      */
     public function dehydrate(){
+        $this->log( "Dehydrating", LogLevel::DEBUG );
         return serialize( $this );
     }
 
@@ -125,13 +151,17 @@ abstract class AbstractViewComponent
      * @param $serialised
      * @param ExecHelper $execHelper
      * @param DependencyInjector $dependencyInjector Optional
+     * @param LoggerInterface $logger
      * @return AbstractViewComponent
      */
-    public static function rehydrate( $serialised, ExecHelper $execHelper, DependencyInjector $dependencyInjector = null ){
+    
+    public static function rehydrate( $serialised, ExecHelper $execHelper, DependencyInjector $dependencyInjector = null, LoggerInterface $logger = null ){
         /** @var AbstractViewComponent $view */
         $view = unserialize( $serialised );
         $view->setExec( $execHelper );
         $view->setDependencyInjector( $dependencyInjector );
+        $view->setLogger( $logger );
+        $view->log( "Rehydrated", LogLevel::DEBUG );
         return $view;
     }
 
@@ -156,6 +186,7 @@ abstract class AbstractViewComponent
      */
     public function renderRoot()
     {
+        $this->log( "Rendering root component", LogLevel::DEBUG );
         $root = $this->getRootComponent();
         return $root->render();
     }
@@ -169,6 +200,7 @@ abstract class AbstractViewComponent
      */
     public function render( $execMethodName = null, array $execArgs = null )
     {
+        
         $this->updateState();
         $this->state->validate();
         $this->initTemplate();
@@ -176,8 +208,10 @@ abstract class AbstractViewComponent
         // If we're called with an 'exec' then run it instead of rendering the whole tree.
         // It may still render the whole tree or it may just render a portion or just return JSON
         if ($execMethodName) { // Used to test for null but it could easily be an empty string
+            $this->log( "Rendering with exec: {$execMethodName}, args:".var_export($execArgs, true ), LogLevel::DEBUG );
             $out = $this->execMethod( $execMethodName, $execArgs );
         }else {
+            $this->log( "Rendering without exec", LogLevel::DEBUG );
             $out = $this->template->render( $this->state, $this->childComponentOutputs );
             if (!( $out instanceof ViewComponentResponse )) {
                 throw new \Exception( get_class( $this->template ) . " returned invalid response. Should have been an instance of ViewComponentResponse" );
@@ -238,6 +272,7 @@ abstract class AbstractViewComponent
      */
     public function updateProps( $props = [ ] )
     {
+        $this->log( "Stored new props: ".var_export($props, true ), LogLevel::DEBUG );
         $this->props = $props;
     }
 
@@ -323,13 +358,15 @@ abstract class AbstractViewComponent
      */
     protected function addOrUpdateChild( $handle, $type, $props, array $initConfig = null )
     {
+        $this->log( "Adding child '{$handle}' of type {$type}", LogLevel::DEBUG );
         if (!isset( $this->childComponents[ $handle ] )) {
             if( ! class_exists( $type ) ){
                 throw new \Exception( "Class '{$type}' for sub-component  does not exist." );
             }
-            $child = new $type( $handle, $this, $initConfig, $this->exec, $this->dependencyInjector );
+            $child = new $type( $handle, $this, $initConfig, $this->exec, $this->dependencyInjector, $this->logger );
             $this->childComponents[ $handle ] = $child;
         }else {
+            // exec, di and logger are set recursively in rehydrate()
             $child = $this->childComponents[ $handle ];
         }
         $child->updateProps( $props );
@@ -381,6 +418,7 @@ abstract class AbstractViewComponent
      */
     protected function testInputs( array $inputSpec, array &$inputs )
     {
+        
         foreach ($inputSpec as $fieldName => $fieldSpec) {
             // Required field
             if (( count( $fieldSpec ) < 2 )) {
@@ -496,10 +534,25 @@ abstract class AbstractViewComponent
         // are specified in the optional injectDependencies() method's
         // signature
         if( null !== $dependencyInjector ){
+            $this->log( "Dependency injector added and running", LogLevel::DEBUG );
             $this->dependencyInjector = $dependencyInjector;
-            $this->dependencyInjector->injectInto( $this, "injectDependencies" );
+            $dependencyInjector->injectInto( $this, "injectDependencies" );
             foreach( $this->childComponents as $child ){
                 $child->setDependencyInjector( $dependencyInjector );
+            }
+        }
+    }
+
+    /**
+     * @param LoggerInterface $logger
+     */
+    private function setLogger( LoggerInterface $logger = null )
+    {
+        if( null !== $logger ){
+            $this->logger = $logger;
+            /** @var AbstractViewComponent $child */
+            foreach( $this->childComponents as $child ){
+                $child->setLogger( $logger );
             }
         }
     }
