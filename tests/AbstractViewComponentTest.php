@@ -13,6 +13,7 @@ use PatternSeek\ComponentView\AbstractViewComponent;
 use PatternSeek\ComponentView\ExecHelper;
 use PatternSeek\ComponentView\Test\Component\HelloViewComponent;
 use PatternSeek\DependencyInjector\DependencyInjector;
+use Pimple\Container;
 
 /**
  * Class SomeClass
@@ -26,7 +27,14 @@ class SomeClass{}
  */
 class AbstractViewComponentTest extends \PHPUnit_Framework_TestCase {
 
+    protected function setUp()
+    {
+        DependencyInjector::init( new Container() );
+    }
+
     function testRender(){
+        
+        
 
         // Optional off
         $props =

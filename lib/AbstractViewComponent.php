@@ -81,16 +81,10 @@ abstract class AbstractViewComponent
     protected $logger;
 
     /**
-     * @var DependencyInjector
-     */
-    protected $dependencyInjector;
-
-    /**
      * @param null $handle
      * @param AbstractViewComponent $parent
      * @param array $initConfig
      * @param ExecHelper $execHelper
-     * @param DependencyInjector $di
      * @param LoggerInterface $logger
      */
     public function __construct(
@@ -98,7 +92,6 @@ abstract class AbstractViewComponent
         AbstractViewComponent $parent = null,
         $initConfig = [ ],
         ExecHelper $execHelper = null,
-        DependencyInjector $di = null,
         LoggerInterface $logger = null
     ){
         // Null means we are root
@@ -112,7 +105,7 @@ abstract class AbstractViewComponent
         }
         $this->setExec( $execHelper );
 
-        $this->setDependencyInjector( $di );
+        $this->handleDependencyInjection();
         
         $this->setLogger( $logger );
 
@@ -150,16 +143,15 @@ abstract class AbstractViewComponent
      * Use this to unserialise ViewComponents
      * @param $serialised
      * @param ExecHelper $execHelper
-     * @param DependencyInjector $dependencyInjector Optional
      * @param LoggerInterface $logger
      * @return AbstractViewComponent
      */
     
-    public static function rehydrate( $serialised, ExecHelper $execHelper, DependencyInjector $dependencyInjector = null, LoggerInterface $logger = null ){
+    public static function rehydrate( $serialised, ExecHelper $execHelper, LoggerInterface $logger = null ){
         /** @var AbstractViewComponent $view */
         $view = unserialize( $serialised );
         $view->setExec( $execHelper );
-        $view->setDependencyInjector( $dependencyInjector );
+        $view->handleDependencyInjection();
         $view->setLogger( $logger );
         $view->log( "Rehydrated", LogLevel::DEBUG );
         return $view;
@@ -363,7 +355,7 @@ abstract class AbstractViewComponent
             if( ! class_exists( $type ) ){
                 throw new \Exception( "Class '{$type}' for sub-component  does not exist." );
             }
-            $child = new $type( $handle, $this, $initConfig, $this->exec, $this->dependencyInjector, $this->logger );
+            $child = new $type( $handle, $this, $initConfig, $this->exec, $this->logger );
             $this->childComponents[ $handle ] = $child;
         }else {
             // exec, di and logger are set recursively in rehydrate()
@@ -523,23 +515,17 @@ abstract class AbstractViewComponent
         }
     }
 
-    /**
-     * @param DependencyInjector $dependencyInjector
-     */
-    private function setDependencyInjector( DependencyInjector $dependencyInjector = null )
+    private function handleDependencyInjection()
     {
         // It's a little strange that the object injects its own
         // dependencies but it means that callers don't need to do
         // it manually and you still get the advantage that the deps
         // are specified in the optional injectDependencies() method's
         // signature
-        if( null !== $dependencyInjector ){
-            $this->log( "Dependency injector added and running", LogLevel::DEBUG );
-            $this->dependencyInjector = $dependencyInjector;
-            $dependencyInjector->injectInto( $this, "injectDependencies" );
-            foreach( $this->childComponents as $child ){
-                $child->setDependencyInjector( $dependencyInjector );
-            }
+        $this->log( "Dependency injection...", LogLevel::DEBUG );
+        DependencyInjector::instance()->injectIntoMethod( $this );
+        foreach( $this->childComponents as $child ){
+            $child->handleDependencyInjection();
         }
     }
 
