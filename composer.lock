@@ -204,12 +204,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/patternseek/dependencyinjector.git",
-                "reference": "091c99c49c5b98a4bb774fa5cd69904779bc1dc7"
+                "reference": "cdba3fe5b27cdaa5199d1af231dd12aec40172cc"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/patternseek/dependencyinjector/zipball/091c99c49c5b98a4bb774fa5cd69904779bc1dc7",
-                "reference": "091c99c49c5b98a4bb774fa5cd69904779bc1dc7",
+                "url": "https://api.github.com/repos/patternseek/dependencyinjector/zipball/cdba3fe5b27cdaa5199d1af231dd12aec40172cc",
+                "reference": "cdba3fe5b27cdaa5199d1af231dd12aec40172cc",
                 "shasum": ""
             },
             "require": {
@@ -239,7 +239,7 @@
             "keywords": [
                 "library"
             ],
-            "time": "2015-07-01 14:20:26"
+            "time": "2015-07-02 10:13:36"
         },
         {
             "name": "patternseek/structclass",
