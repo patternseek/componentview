@@ -372,7 +372,9 @@ abstract class AbstractViewComponent
      * @param array $props
      * @return void
      */
-    abstract protected function doUpdateState( $props );
+    protected function doUpdateState( $props ){
+        //
+    }
 
     /**
      * testInputs() compares a set of named inputs (props or args) in the associative array $inputs with an input specification.
