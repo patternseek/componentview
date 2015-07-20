@@ -31,7 +31,7 @@ class WorldViewComponent extends AbstractViewComponent{
      * @param $props
      * @return array Template props
      */
-    protected function doUpdateState( $props )
+    protected function update( $props )
     {
         // No processing required here in this component
     }

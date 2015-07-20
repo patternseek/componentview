@@ -79,7 +79,7 @@ EOS;
      * @param $props
      * @return void
      */
-    protected function doUpdateState( $props )
+    protected function update( $props )
     {
 
 

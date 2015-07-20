@@ -262,7 +262,7 @@ abstract class AbstractViewComponent
      * @param $props
      * @throws \Exception
      */
-    public function updateProps( $props = [ ] )
+    public function updateProps( array $props = [ ] )
     {
         $this->log( "Stored new props: ".var_export($props, true ), LogLevel::DEBUG );
         $this->props = $props;
@@ -372,7 +372,7 @@ abstract class AbstractViewComponent
      * @param array $props
      * @return void
      */
-    protected function doUpdateState( $props ){
+    protected function update( $props ){
         //
     }
 
@@ -493,11 +493,11 @@ abstract class AbstractViewComponent
     private function updateState()
     {
         // doUpdateState() creates/updates children via addOrUpdateChild()
-        $this->doUpdateState( $this->props );
+        $this->update( $this->props );
         // Prune children no longer in use.
         // They are marked as in use by addOrUpdateChild()
         // which implementing classes call from doUpdateState()
-        foreach (array_keys( $this->childComponents ) as $handle) {
+        foreach ( $this->childComponents as $handle=>$_ ) {
             if (!$this->updatedChildren[ $handle ]) {
                 unset( $this->childComponents[ $handle ] );
             }
