@@ -12,35 +12,54 @@ namespace PatternSeek\ComponentView\Template;
 use PatternSeek\ComponentView\AbstractViewComponent;
 use PatternSeek\ComponentView\ViewComponentResponse;
 use PatternSeek\ComponentView\ViewState\ViewState;
+use Puli\Repository\Api\ResourceRepository;
+use Puli\TwigExtension\PuliExtension;
+use Puli\TwigExtension\PuliTemplateLoader;
 use Twig_Autoloader;
 use Twig_Environment;
 use Twig_Loader_String;
 use Twig_LoaderInterface;
 
 /**
- * Class TwigTemplateString
+ * Class TwigTemplate
  * @package PatternSeek\ComponentView
  */
-abstract class AbstractTwigTemplate extends AbstractTemplate{
+class TwigTemplate extends AbstractTemplate{
 
     /**
      * @var Twig_Environment
      */
     protected $twig;
     /**
-     * @var string A Twig template
+     * @var string A Twig template path
      */
-    protected $templateNameOrContents;
+    protected $templatePath;
+
+    /**
+     * @var string A Twig template already loaded as a string
+     */
+    protected $templateString;
+
+    /**
+     * @var ResourceRepository
+     */
+    protected $repo;
 
     /**
      * @param AbstractViewComponent $component
-     * @param string $templateNameOrContents
+     * @param string $templatePath
+     * @param null $templateString
+     * @param ResourceRepository $repo
      */
-    public function __construct( AbstractViewComponent $component, $templateNameOrContents ){
+    public function __construct( AbstractViewComponent $component, $templatePath=null, $templateString=null, ResourceRepository $repo = null ){
         parent::__construct( $component );
+        $this->templatePath = $templatePath;
+        $this->templateString = $templateString;
+        // Optional Puli repo
+        $this->repo = $repo;
+
         Twig_Autoloader::register();
         $this->initTwig( $this->getLoader() );
-        $this->templateNameOrContents = $templateNameOrContents;
     }
 
     /**
@@ -54,7 +73,7 @@ abstract class AbstractTwigTemplate extends AbstractTemplate{
         $this->addToTwig( $componentOutputs );
 
         $rendered = $this->twig->render(
-            $this->templateNameOrContents,
+            $this->templateString?$this->templateString:$this->templatePath,
             [
                 'state' => $state,
                 'this' => $this->component,
@@ -66,7 +85,14 @@ abstract class AbstractTwigTemplate extends AbstractTemplate{
     /**
      * @return Twig_LoaderInterface
      */
-    abstract protected function getLoader();
+    protected function getLoader(){
+        if( $this->templateString !== null ){
+            $loader = new Twig_Loader_String();
+        }else{
+            $loader = new PuliTemplateLoader( $this->repo );
+        }
+        return $loader;
+    }
 
     /**
      * @param $loader
@@ -85,6 +111,11 @@ abstract class AbstractTwigTemplate extends AbstractTemplate{
      */
     protected function addToTwig( array $componentOutputs )
     {
+        // If puli plugin is available then add it.
+        if( class_exists( "Puli\\TwigExtension\\PuliExtension" ) && null !== $this->repo ){
+            $this->twig->addExtension(new PuliExtension($this->repo));
+        }
+        
         // This is defined here as this is where $components is available. It would be better in the superclass.
         $componentRenderFunc =
             function ( $name ) use ( $componentOutputs ){

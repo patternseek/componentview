@@ -2,7 +2,7 @@
 namespace PatternSeek\ComponentView\Test\Component;
 
 use PatternSeek\ComponentView\AbstractViewComponent;
-use PatternSeek\ComponentView\Template\TwigTemplateString;
+use PatternSeek\ComponentView\Template\TwigTemplate;
 use PatternSeek\ComponentView\Test\SomeClass;
 use PatternSeek\ComponentView\Test\ViewState\HelloState;
 
@@ -38,7 +38,7 @@ Hello {{component( 'world' )}}
 An exec url {{ this.exec.url( "someExec", {'w1':'w1'} ) }}
 EOS;
 
-        $this->template = new TwigTemplateString( $this, $tplTwig );
+        $this->template = new TwigTemplate( $this, null, $tplTwig );
     }
 
     /**
