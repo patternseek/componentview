@@ -117,6 +117,17 @@ class TwigTemplate extends AbstractTemplate{
             $this->twig->addExtension(new PuliExtension($this->repo));
         }
         
+        // Function for calling static methods
+        $staticFunc = new \Twig_SimpleFunction('static', 
+            function ($class, $function, $args = array())
+            {
+                if (class_exists($class) && method_exists($class, $function))
+                    return call_user_func_array(array($class, $function), $args);
+                return null;
+            }
+        );
+        $this->twig->addFunction('static', $staticFunc );
+        
         // This is defined here as this is where $components is available. It would be better in the superclass.
         $componentRenderFunc =
             function ( $name ) use ( $componentOutputs ){
