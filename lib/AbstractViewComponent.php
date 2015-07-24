@@ -348,7 +348,7 @@ abstract class AbstractViewComponent
      * @return AbstractViewComponent
      * @throws \Exception
      */
-    protected function addOrUpdateChild( $handle, $type, $props, array $initConfig = null )
+    protected function addOrUpdateChild( $handle, $type, array $props = [], array $initConfig = null )
     {
         $this->log( "Adding child '{$handle}' of type {$type}", LogLevel::DEBUG );
         if (!isset( $this->childComponents[ $handle ] )) {
