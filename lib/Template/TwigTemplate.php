@@ -86,10 +86,11 @@ class TwigTemplate extends AbstractTemplate{
      * @return Twig_LoaderInterface
      */
     protected function getLoader(){
-        if( $this->templateString !== null ){
-            $loader = new Twig_Loader_String();
+
+        if( class_exists( "Puli\\TwigExtension\\PuliExtension" ) && null !== $this->repo ) {
+            $loader = new \Twig_Loader_Chain( [new PuliTemplateLoader( $this->repo ),new Twig_Loader_String() ] );
         }else{
-            $loader = new PuliTemplateLoader( $this->repo );
+            $loader = new Twig_Loader_String();
         }
         return $loader;
     }
