@@ -108,22 +108,16 @@ EOS;
         <script type="application/javascript">
             if( typeof(execLink) != "function" ){
                 var execLink = function( url, targetDiv ){
-                    var httpRequest = new XMLHttpRequest();
-                    httpRequest.onreadystatechange = function(){
-                        if (httpRequest.readyState === 4) {
-                            if (httpRequest.status === 200) {
-                                $( "#"+targetDiv ).replaceWith( httpRequest.responseText );
-                                $("body").css("cursor", "default");
-                            } else {
-                                // Failed
-                                $("body").css("cursor", "default");
-                            }
-                        } else {
-                            // still not ready
-                        }
-                    };
-                    httpRequest.open('GET', url, true);
-                    httpRequest.send(null);return false;
+                    // Send the data using post
+                    var posting = $.get( url, $( form ).serialize() );
+                 
+                    // Put the results in a div
+                    posting.done(function( data ) {
+                        $( "#"+targetDiv ).replaceWith( data );
+                        $("body").css("cursor", "default");
+                    });
+    
+                    // Show optional progress
                     $("body").css("cursor", "progress");
                 }
             }
@@ -149,23 +143,17 @@ EOS;
         <script type="application/javascript">
         if( typeof(execForm) != "function" ){
             var execForm = function( form, targetDiv ){
-                var httpRequest = new XMLHttpRequest();
-                httpRequest.onreadystatechange = function(){
-                    if (httpRequest.readyState === 4) {
-                        if (httpRequest.status === 200) {
-                                $( "#"+targetDiv ).replaceWith( httpRequest.responseText );
-                                $("body").css("cursor", "default");
-                        } else {
-                            // ... Failed
-                            $("body").css("cursor", "default");
-                        }
-                    } else {
-                        // still not ready
-                    }
-                };
-                var data  = new FormData(form);
-                httpRequest.open('POST', [location.protocol, '//', location.host, location.pathname].join('') );
-                httpRequest.send(data);
+            
+                // Send the data using post
+                var posting = $.post( [location.protocol, '//', location.host, location.pathname].join(''), $( form ).serialize() );
+             
+                // Put the results in a div
+                posting.done(function( data ) {
+                    $( "#"+targetDiv ).replaceWith( data );
+                    $("body").css("cursor", "default");
+                });
+
+                // Show optional progress
                 $("body").css("cursor", "progress");
             }
         }
