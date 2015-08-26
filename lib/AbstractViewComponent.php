@@ -73,7 +73,7 @@ abstract class AbstractViewComponent
     /**
      * @var array The view's properties
      */
-    protected $props;
+    protected $props = [];
 
     /**
      * @var LoggerInterface
