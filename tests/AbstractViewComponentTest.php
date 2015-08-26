@@ -62,7 +62,6 @@ class AbstractViewComponentTest extends \PHPUnit_Framework_TestCase {
         $view = new HelloViewComponent( null, null, $props, null, null, $log );
         $view->execFormHelper = function (){
         };
-        $view->updateProps();
         $outObj = $view->render();
         
         //print_r( $log->messages );
@@ -115,7 +114,6 @@ EOS;
             ];
         $log = new MemoryLogger();
         $view = new HelloViewComponent( null, null, $props, null, null, $log );
-        $view->updateProps();
         $outObj = $view->render( "world.jsonMultiply", ['multiplier'=>3] ); // Multiplies multiplier * props['intRequired']
 
         //print_r( $log->messages );
@@ -150,13 +148,11 @@ EOS;
         $execHelper = new ExecHelper();
         $log = new MemoryLogger();
         $view = new HelloViewComponent( null, null, $props, $execHelper, null, $log );
-        $view->updateProps();
         $outObj = $view->render( "world.setState", ['something'=>5] ); // Multiplies multiplier * props['intRequired']
         $this->assertEquals( "OK", $outObj->content );
         $viewSer = $view->dehydrate();
         // Next page
         $view = AbstractViewComponent::rehydrate( $viewSer, $execHelper, null, $log );
-        $view->updateProps();
         $outObj = $view->render( "world.getState" ); // Multiplies multiplier * props['intRequired']
 
         //print_r( $log->messages );
@@ -164,7 +160,7 @@ EOS;
         $this->assertEquals( 5, $outObj->content );
     }
 
-    function testUpdate(){
+    function testInputCheckerInInit(){
 
         // Optional off
         $props =
@@ -190,7 +186,6 @@ EOS;
             ];
         $log = new MemoryLogger();
         $view = new HelloViewComponent( null, null, $props, null, null, $log );
-        $view->updateProps();
 
         // Optional on
         $props =
@@ -215,8 +210,6 @@ EOS;
                 'SomeClassWithPrebuiltDefault'=>new SomeClass(),
             ];
         $view = new HelloViewComponent( null, null, $props );
-        $view->updateProps();
-
 
         // Failures
 
@@ -825,7 +818,6 @@ EOS;
         try{
             $log = new MemoryLogger();
             $view = new HelloViewComponent( null, null, $props, null, null, $log );
-            $view->updateProps();
         }catch ( \Exception $e ){
             $this->assertTrue( true );
             return;
