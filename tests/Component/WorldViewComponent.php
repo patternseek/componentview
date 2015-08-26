@@ -33,28 +33,17 @@ class WorldViewComponent extends AbstractViewComponent{
      */
     protected function update( $props )
     {
-        // No processing required here in this component
-    }
-
-    /**
-     * @param $initConfig
-     * @return void
-     * @throws \Exception
-     */
-    protected function initComponent( $initConfig )
-    {
-
         $this->testInputs(
             [
                 'name' => [ 'string' ],
                 'intRequired' => [ 'integer' ]
             ],
-            $initConfig
+            $props
         );
 
         // Used by jsonMultiplyHandler()
-        $this->state->intRequired = $initConfig[ 'intRequired' ];
-        $this->state->name = $initConfig[ 'name' ];
+        $this->state->intRequired = $props[ 'intRequired' ];
+        $this->state->name = $props[ 'name' ];
     }
 
     /**

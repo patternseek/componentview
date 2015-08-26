@@ -34,8 +34,6 @@ class AbstractViewComponentTest extends \PHPUnit_Framework_TestCase {
 
     function testRender(){
         
-        
-
         // Optional off
         $props =
             [
@@ -59,7 +57,8 @@ class AbstractViewComponentTest extends \PHPUnit_Framework_TestCase {
                 #'SomeClassWithPrebuiltDefault'=>,
             ];
         $log = new MemoryLogger();
-        $view = new HelloViewComponent( null, null, $props, null, null, $log );
+        $view = new HelloViewComponent( null, null, null, $log );
+        $view->updateProps( $props );
         $view->execFormHelper = function (){
         };
         $outObj = $view->render();
@@ -113,7 +112,8 @@ EOS;
                 #'SomeClassWithPrebuiltDefault'=>,
             ];
         $log = new MemoryLogger();
-        $view = new HelloViewComponent( null, null, $props, null, null, $log );
+        $view = new HelloViewComponent( null, null, null, $log );
+        $view->updateProps( $props );
         $outObj = $view->render( "world.jsonMultiply", ['multiplier'=>3] ); // Multiplies multiplier * props['intRequired']
 
         //print_r( $log->messages );
@@ -147,12 +147,14 @@ EOS;
             ];
         $execHelper = new ExecHelper();
         $log = new MemoryLogger();
-        $view = new HelloViewComponent( null, null, $props, $execHelper, null, $log );
+        $view = new HelloViewComponent( null, null, $execHelper, $log );
+        $view->updateProps( $props );
         $outObj = $view->render( "world.setState", ['something'=>5] ); // Multiplies multiplier * props['intRequired']
         $this->assertEquals( "OK", $outObj->content );
         $viewSer = $view->dehydrate();
         // Next page
         $view = AbstractViewComponent::rehydrate( $viewSer, $execHelper, null, $log );
+        $view->updateProps( $props );
         $outObj = $view->render( "world.getState" ); // Multiplies multiplier * props['intRequired']
 
         //print_r( $log->messages );
@@ -160,7 +162,7 @@ EOS;
         $this->assertEquals( 5, $outObj->content );
     }
 
-    function testInputCheckerInInit(){
+    function testInputCheckerInUpdate(){
 
         // Optional off
         $props =
@@ -185,8 +187,9 @@ EOS;
                 #'SomeClassWithPrebuiltDefault'=>,
             ];
         $log = new MemoryLogger();
-        $view = new HelloViewComponent( null, null, $props, null, null, $log );
-
+        $view = new HelloViewComponent( null, null, null, $log );
+        $view->updateProps( $props );
+        
         // Optional on
         $props =
             [
@@ -209,7 +212,8 @@ EOS;
                 'SomeClassOptional'=>new SomeClass(),
                 'SomeClassWithPrebuiltDefault'=>new SomeClass(),
             ];
-        $view = new HelloViewComponent( null, null, $props );
+        $view = new HelloViewComponent( null, null, null, $log );
+        $view->updateProps( $props );
 
         // Failures
 
@@ -817,7 +821,9 @@ EOS;
 
         try{
             $log = new MemoryLogger();
-            $view = new HelloViewComponent( null, null, $props, null, null, $log );
+            $view = new HelloViewComponent( null, null, null, $log );
+            $view->updateProps( $props );
+            $view->render();
         }catch ( \Exception $e ){
             $this->assertTrue( true );
             return;

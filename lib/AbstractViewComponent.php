@@ -83,14 +83,13 @@ abstract class AbstractViewComponent
     /**
      * @param null $handle
      * @param AbstractViewComponent $parent
-     * @param array $initConfig
      * @param ExecHelper $execHelper
      * @param LoggerInterface $logger
+     * @internal param array $initConfig
      */
     public function __construct(
         $handle = null,
         AbstractViewComponent $parent = null,
-        $initConfig = [ ],
         ExecHelper $execHelper = null,
         LoggerInterface $logger = null
     ){
@@ -111,11 +110,6 @@ abstract class AbstractViewComponent
 
         // Set up the state container
         $this->initState();
-
-        $this->log( "Initialising with config: ".var_export( $initConfig, true ), LogLevel::DEBUG );
-        
-        // Perform one-time init, if implemented by subclass
-        $this->initComponent( $initConfig );
     }
 
     /**
@@ -313,16 +307,6 @@ abstract class AbstractViewComponent
     abstract protected function initState();
 
     /**
-     * @param $initConfig
-     * @return void
-     *
-     */
-    protected function initComponent( $initConfig )
-    {
-        // Optional override
-    }
-
-    /**
      * Return the this object's path in the current component hierarchy
      * @return string
      */
@@ -344,18 +328,17 @@ abstract class AbstractViewComponent
      * @param string $handle
      * @param string $type
      * @param array $props
-     * @param array $initConfig
      * @return AbstractViewComponent
      * @throws \Exception
      */
-    protected function addOrUpdateChild( $handle, $type, array $props = [], array $initConfig = null )
+    protected function addOrUpdateChild( $handle, $type, array $props = [ ] )
     {
         $this->log( "Adding child '{$handle}' of type {$type}", LogLevel::DEBUG );
         if (!isset( $this->childComponents[ $handle ] )) {
             if( ! class_exists( $type ) ){
                 throw new \Exception( "Class '{$type}' for sub-component  does not exist." );
             }
-            $child = new $type( $handle, $this, $initConfig, $this->exec, $this->logger );
+            $child = new $type( $handle, $this, $this->exec, $this->logger );
             $this->childComponents[ $handle ] = $child;
         }else {
             // exec, di and logger are set recursively in rehydrate()

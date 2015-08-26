@@ -41,12 +41,15 @@ EOS;
         $this->template = new TwigTemplate( $this, null, $tplTwig );
     }
 
+
     /**
-     * @param $initConfig
-     * @throws \Exception
+     * Using $props and $this->state, optionally update state, optionally create child components via addOrUpdateChild()
+     * @param $props
+     * @return void
      */
-    protected function initComponent( $initConfig )
+    protected function update( $props )
     {
+
         $this->testInputs(
             [
                 'anyTypeRequired' => [ ],
@@ -68,28 +71,17 @@ EOS;
                 'SomeClassOptional' => [ 'PatternSeek\ComponentView\Test\SomeClass', null ],
                 'SomeClassWithPrebuiltDefault' => [ 'PatternSeek\ComponentView\Test\SomeClass', new SomeClass() ],
             ],
-            $initConfig
+            $props
         );
-        $this->state->name = $initConfig[ 'name' ];
-        $this->state->intRequired = $initConfig[ 'intRequired' ];
-    }
-
-    /**
-     * Using $props and $this->state, optionally update state, optionally create child components via addOrUpdateChild()
-     * @param $props
-     * @return void
-     */
-    protected function update( $props )
-    {
-
-
+        $this->state->name = $props[ 'name' ];
+        $this->state->intRequired = $props[ 'intRequired' ];
+        
+        
         $this->addOrUpdateChild(
             "world", "\\PatternSeek\\ComponentView\\Test\\Component\\WorldViewComponent",
-            [ ],
             [   // This is just passing specific parent inputs to the child
                 'name' => $this->state->name,
                 'intRequired' => $this->state->intRequired
-
             ]
         );
         // Normally there might be processing here and $this->state might be populated or modified, but not in this case
