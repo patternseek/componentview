@@ -420,13 +420,13 @@ abstract class AbstractViewComponent
                         break;
                     case "integer":
                     case "int":
-                    $failed = !is_int( $input );
+                    $failed = !is_int( $input+0 );
                         break;
                     case "double":
-                        $failed = !is_double( $input );
+                        $failed = !is_double( $input+0 );
                         break;
                     case "float":
-                        $failed = !is_float( $input );
+                        $failed = !is_float( $input+0 );
                         break;
                     case "string":
                         $failed = !is_string( $input );

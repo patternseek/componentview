@@ -336,28 +336,6 @@ EOS;
              ]
         );
 
-        $this->failConfig(
-             [
-                 'anyTypeRequired'=>1,
-                 'anyTypeRequired2'=>2,
-                 'anyTypeOptional'=>"hello",
-                 'boolRequired'=>true,
-                 'boolRequired2'=>false,
-                 'intOptional'=>FALSE, //
-                 'intRequired'=>4,
-                 'doubleRequired'=>1.1,
-                 'floatRequired'=>1.2,
-                 'stringRequired'=>'string',
-                 'name'=>'someone',
-                 'arrayRequired'=>[],
-                 'objectRequired'=>new SomeClass(),
-                 'resourceRequired'=>fopen( "/tmp", 'r' ),
-                 'callableRequired'=>function(){},
-                 'SomeClassRequired'=>new SomeClass(),
-                 'SomeClassOptional'=>new SomeClass(),
-                 'SomeClassWithPrebuiltDefault'=>new SomeClass(),
-             ]
-        );
 
         $this->failConfig(
              [
