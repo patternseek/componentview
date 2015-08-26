@@ -56,11 +56,6 @@ abstract class AbstractViewComponent
     protected $childComponents = [ ];
 
     /**
-     * @var string[]
-     */
-    protected $childComponentOutputs = [];
-
-    /**
      * @var boolean[] Used to track which children are updated when update() is called. Those that aren't are pruned.
      */
     protected $updatedChildren = [ ];
@@ -69,11 +64,6 @@ abstract class AbstractViewComponent
      * @var AbstractTemplate
      */
     protected $template;
-
-    /**
-     * @var array The view's properties
-     */
-    protected $props = [];
 
     /**
      * @var LoggerInterface
@@ -160,8 +150,7 @@ abstract class AbstractViewComponent
             'childComponents',
             'handle',
             'parent',
-            'state'/*,
-            'exec'*/
+            'state'
         ];
     }
 
@@ -186,9 +175,6 @@ abstract class AbstractViewComponent
      */
     public function render( $execMethodName = null, array $execArgs = null )
     {
-        
-        $this->updateState();
-        $this->state->validate();
         $this->initTemplate();
 
         // If we're called with an 'exec' then run it instead of rendering the whole tree.
@@ -198,10 +184,23 @@ abstract class AbstractViewComponent
             $out = $this->execMethod( $execMethodName, $execArgs );
         }else {
             $this->log( "Rendering without exec", LogLevel::DEBUG );
-            $out = $this->template->render( $this->state, $this->childComponentOutputs );
+            $out = $this->template->render( $this->state );
             if (!( $out instanceof ViewComponentResponse )) {
                 throw new \Exception( get_class( $this->template ) . " returned invalid response. Should have been an instance of ViewComponentResponse" );
             }
+
+            // XXX Removed to allow creation of child components in templates
+            // Prune children no longer in use.
+            // They are marked as in use by childComponent()
+            // which is called from templates during rendering.
+            // We only do this when rendering the full tree or they wouldn't all have been touched.
+            #foreach ( $this->childComponents as $handle=>$_ ) {
+            #    if (!$this->updatedChildren[ $handle ]) {
+            #        unset( $this->childComponents[ $handle ] );
+            #    }
+            #}
+            $this->updatedChildren = [ ];
+            
         }
         return $out;
     }
@@ -252,15 +251,6 @@ abstract class AbstractViewComponent
         return $this->parent;
     }
 
-    /**
-     * @param $props
-     * @throws \Exception
-     */
-    public function updateProps( array $props = [ ] )
-    {
-        $this->log( "Stored new props: ".var_export($props, true ), LogLevel::DEBUG );
-        $this->props = $props;
-    }
 
     /**
      * @param $string
@@ -331,7 +321,7 @@ abstract class AbstractViewComponent
      * @return AbstractViewComponent
      * @throws \Exception
      */
-    protected function addOrUpdateChild( $handle, $type, array $props = [ ] )
+    public function childComponent( $handle, $type, array $props = [ ] )
     {
         $this->log( "Adding child '{$handle}' of type {$type}", LogLevel::DEBUG );
         if (!isset( $this->childComponents[ $handle ] )) {
@@ -345,13 +335,12 @@ abstract class AbstractViewComponent
             $child = $this->childComponents[ $handle ];
         }
         $child->updateProps( $props );
-        $this->childComponentOutputs[ $handle ] = $child->render()->content;
         $this->updatedChildren[ $handle ] = true;
-        return $this->childComponents[ $handle ];
+        return $child->render()->content;
     }
 
     /**
-     * Using $props and $this->state, optionally update state, optionally create child components via addOrUpdateChild().
+     * Using $props and $this->state, optionally update state,.
      * @param array $props
      * @return void
      */
@@ -473,19 +462,11 @@ abstract class AbstractViewComponent
     /**
      *
      */
-    private function updateState()
+    public function updateProps( $props )
     {
-        // doUpdateState() creates/updates children via addOrUpdateChild()
-        $this->update( $this->props );
-        // Prune children no longer in use.
-        // They are marked as in use by addOrUpdateChild()
-        // which implementing classes call from doUpdateState()
-        foreach ( $this->childComponents as $handle=>$_ ) {
-            if (!$this->updatedChildren[ $handle ]) {
-                unset( $this->childComponents[ $handle ] );
-            }
-        }
-        $this->updatedChildren = [ ];
+        $this->log( "Updating with props: ".var_export($props, true ), LogLevel::DEBUG );
+        $this->update( $props );
+        $this->state->validate();
     }
 
     /**

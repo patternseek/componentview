@@ -73,6 +73,21 @@ EOS;
     }
 
     /**
+     * Helper for calling static methods
+     * @param $class
+     * @param $function
+     * @param array $args
+     * @return mixed|null
+     */
+    function callStatic($class, $function, $args = array())
+    {
+        if (class_exists($class) && method_exists($class, $function)) {
+            return call_user_func_array( array( $class, $function ), $args );
+        }
+        return null;
+    }
+
+    /**
      * Generate a link which replaces the content of a DOM element with the output of an exec method
      * @param $execMethod
      * @param array $args
