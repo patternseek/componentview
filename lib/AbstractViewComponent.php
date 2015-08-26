@@ -53,7 +53,7 @@ abstract class AbstractViewComponent
     /**
      * @var AbstractViewComponent[]
      */
-    protected $childComponents = [ ];
+    public $childComponents = [ ];
 
     /**
      * @var boolean[] Used to track which children are updated when update() is called. Those that aren't are pruned.
