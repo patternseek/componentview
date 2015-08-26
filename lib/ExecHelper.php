@@ -138,13 +138,8 @@ EOS;
                 httpRequest.onreadystatechange = function(){
                     if (httpRequest.readyState === 4) {
                         if (httpRequest.status === 200) {
-                            /* var repl = document.getElementById( targetDiv );
-                                repl.innerHTML = httpRequest.responseText;
-                                repl.parentNode.replaceChild( repl.firstChild, repl );
-                                */
                                 $( "#"+targetDiv ).replaceWith( httpRequest.responseText );
                                 $("body").css("cursor", "default");
-                                /* $( "#"+targetDiv ).replaceWith( $( "#"+targetDiv ).firstChild ) */
                         } else {
                             // ... Failed
                             $("body").css("cursor", "default");
@@ -154,7 +149,7 @@ EOS;
                     }
                 };
                 var data  = new FormData(form);
-                httpRequest.open('POST', document.URL);
+                httpRequest.open('POST', [location.protocol, '//', location.host, location.pathname].join('') );
                 httpRequest.send(data);
                 $("body").css("cursor", "progress");
             }
