@@ -58,7 +58,7 @@ class AbstractViewComponentTest extends \PHPUnit_Framework_TestCase {
             ];
         $log = new MemoryLogger();
         $view = new HelloViewComponent( null, null, null, $log );
-        $view->updateProps( $props );
+        $view->updateView( $props );
         $view->execFormHelper = function (){
         };
         $outObj = $view->render();
@@ -113,9 +113,7 @@ EOS;
             ];
         $log = new MemoryLogger();
         $view = new HelloViewComponent( null, null, null, $log );
-        $view->updateProps( $props );
-        // You can't call an exec method on a sub-component that hasn't been rendered before
-        $view->render();
+        $view->updateView( $props );
         $outObj = $view->render( "world.jsonMultiply", ['multiplier'=>3] ); // Multiplies multiplier * props['intRequired']
 
         //print_r( $log->messages );
@@ -150,15 +148,13 @@ EOS;
         $execHelper = new ExecHelper();
         $log = new MemoryLogger();
         $view = new HelloViewComponent( null, null, $execHelper, $log );
-        $view->updateProps( $props );
-        // You can't call an exec method on a sub-component that hasn't been rendered before
-        $view->render();
+        $view->updateView( $props );
         $outObj = $view->render( "world.setState", ['something'=>5] ); // Multiplies multiplier * props['intRequired']
         $this->assertEquals( "OK", $outObj->content );
         $viewSer = $view->dehydrate();
         // Next page
         $view = AbstractViewComponent::rehydrate( $viewSer, $execHelper, null, $log );
-        $view->updateProps( $props );
+        $view->updateView( $props );
         $outObj = $view->render( "world.getState" ); // Multiplies multiplier * props['intRequired']
 
         //print_r( $log->messages );
@@ -192,7 +188,7 @@ EOS;
             ];
         $log = new MemoryLogger();
         $view = new HelloViewComponent( null, null, null, $log );
-        $view->updateProps( $props );
+        $view->updateView( $props );
         
         // Optional on
         $props =
@@ -217,7 +213,7 @@ EOS;
                 'SomeClassWithPrebuiltDefault'=>new SomeClass(),
             ];
         $view = new HelloViewComponent( null, null, null, $log );
-        $view->updateProps( $props );
+        $view->updateView( $props );
 
         // Failures
 
@@ -804,7 +800,7 @@ EOS;
         try{
             $log = new MemoryLogger();
             $view = new HelloViewComponent( null, null, null, $log );
-            $view->updateProps( $props );
+            $view->updateView( $props );
             $view->render();
         }catch ( \Exception $e ){
             $this->assertTrue( true );

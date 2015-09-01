@@ -34,29 +34,16 @@ class HelloViewComponent extends AbstractViewComponent{
     protected function initTemplate()
     {
         $tplTwig = <<<EOS
-Hello {{
-this.childComponent( 
-    'world', 
-    "\\\\PatternSeek\\\\ComponentView\\\\Test\\\\Component\\\\WorldViewComponent",
-    {   
-        'name':state.name,
-        'intRequired':state.intRequired
-    }
-)}}
+Hello {{ this.renderChild( 'world' ) }}
 An exec url {{ exec.url( "someExec", {'w1':'w1'} ) }}
 EOS;
 
         $this->template = new TwigTemplate( $this, null, $tplTwig );
     }
 
-
-    /**
-     * Using $props and $this->state, optionally update state, optionally create child components via addOrUpdateChild()
-     * @param $props
-     * @return void
-     */
-    protected function update( $props )
+    protected function updateState()
     {
+        $props = $this->props;
 
         $this->testInputs(
             [
@@ -86,5 +73,14 @@ EOS;
         
         // Normally there might be processing here and $this->state might be populated or modified, but not in this case
 
+        $this->addOrUpdateChild(
+            'world',
+            "\\PatternSeek\\ComponentView\\Test\\Component\\WorldViewComponent",
+            [
+                'name' => $this->state->name,
+                'intRequired' => $this->state->intRequired
+            ]
+        );
+        
     }
 }

@@ -26,13 +26,10 @@ class WorldViewComponent extends AbstractViewComponent{
         $this->state = new WorldState();
     }
 
-    /**
-     * Update $this->state
-     * @param $props
-     * @return array Template props
-     */
-    protected function update( $props )
+    protected function updateState()
     {
+        $props = $this->props;
+
         $this->testInputs(
             [
                 'name' => [ 'string' ],

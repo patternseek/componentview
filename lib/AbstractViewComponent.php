@@ -56,11 +56,6 @@ abstract class AbstractViewComponent
     public $childComponents = [ ];
 
     /**
-     * @var boolean[] Used to track which children are updated when update() is called. Those that aren't are pruned.
-     */
-    protected $updatedChildren = [ ];
-
-    /**
      * @var AbstractTemplate
      */
     protected $template;
@@ -69,6 +64,11 @@ abstract class AbstractViewComponent
      * @var LoggerInterface
      */
     protected $logger;
+
+    /**
+     * @var array
+     */
+    protected $props;
 
     /**
      * @param null $handle
@@ -155,19 +155,7 @@ abstract class AbstractViewComponent
     }
 
     /**
-     * Fetch the root component and render it
-     * @return ViewComponentResponse
-     * @throws \Exception
-     */
-    public function renderRoot()
-    {
-        $this->log( "Rendering root component", LogLevel::DEBUG );
-        $root = $this->getRootComponent();
-        return $root->render();
-    }
-
-    /**
-     * Entry point for rendering a component tree. Call updateProps() first.
+     * Entry point for rendering a component tree. Call updateView() first.
      * @param string|null $execMethodName An optional method on this or a subcomponent to execute before rendering
      * @param array|null $execArgs
      * @throws \Exception
@@ -175,6 +163,7 @@ abstract class AbstractViewComponent
      */
     public function render( $execMethodName = null, array $execArgs = null )
     {
+        $this->state->validate();
         $this->initTemplate();
 
         // If we're called with an 'exec' then run it instead of rendering the whole tree.
@@ -188,19 +177,6 @@ abstract class AbstractViewComponent
             if (!( $out instanceof ViewComponentResponse )) {
                 throw new \Exception( get_class( $this->template ) . " returned invalid response. Should have been an instance of ViewComponentResponse" );
             }
-
-            // XXX Removed to allow creation of child components in templates
-            // Prune children no longer in use.
-            // They are marked as in use by childComponent()
-            // which is called from templates during rendering.
-            // We only do this when rendering the full tree or they wouldn't all have been touched.
-            #foreach ( $this->childComponents as $handle=>$_ ) {
-            #    if (!$this->updatedChildren[ $handle ]) {
-            #        unset( $this->childComponents[ $handle ] );
-            #    }
-            #}
-            $this->updatedChildren = [ ];
-            
         }
         return $out;
     }
@@ -213,7 +189,7 @@ abstract class AbstractViewComponent
      * @throws \Exception
      * @return ViewComponentResponse
      */
-    public function execMethod( $methodName, array $args = null )
+    protected function execMethod( $methodName, array $args = null )
     {
         if (!is_array( $methodName )) {
             $methodName = explode( '.', $methodName );
@@ -255,7 +231,7 @@ abstract class AbstractViewComponent
     /**
      * @param $string
      */
-    public function setFlashMessage( $string )
+    protected function setFlashMessage( $string )
     {
         $this->flashMessage = $string;
     }
@@ -263,7 +239,7 @@ abstract class AbstractViewComponent
     /**
      * @param $string
      */
-    public function setFlashError( $string )
+    protected function setFlashError( $string )
     {
         $this->flashError = $string;
     }
@@ -273,7 +249,7 @@ abstract class AbstractViewComponent
      *
      * @return AbstractViewComponent
      */
-    public function getRootComponent()
+    protected function getRootComponent()
     {
         $cur = $this;
         while ($cur->parent !== null) {
@@ -321,9 +297,9 @@ abstract class AbstractViewComponent
      * @return AbstractViewComponent
      * @throws \Exception
      */
-    public function childComponent( $handle, $type, array $props = [ ] )
+    protected function addOrUpdateChild( $handle, $type, array $props = [ ] )
     {
-        $this->log( "Adding child '{$handle}' of type {$type}", LogLevel::DEBUG );
+        $this->log( "Adding/updating child '{$handle}' of type {$type}", LogLevel::DEBUG );
         if (!isset( $this->childComponents[ $handle ] )) {
             if( ! class_exists( $type ) ){
                 throw new \Exception( "Class '{$type}' for sub-component  does not exist." );
@@ -335,16 +311,32 @@ abstract class AbstractViewComponent
             $child = $this->childComponents[ $handle ];
         }
         $child->updateProps( $props );
-        $this->updatedChildren[ $handle ] = true;
-        return $child->render()->content;
+        $child->updateState();
     }
 
     /**
-     * Using $props and $this->state, optionally update state,.
-     * @param array $props
+     * Render a child component.
+     *
+     * @param $handle
+     * @return ViewComponentResponse
+     * @throws \Exception
+     */
+    public function renderChild( $handle )
+    {
+        if (!$this->childComponents[ $handle ]) {
+            $message = "Attempted to render nonexistent child component with handle '{$handle}'";
+            $this->log( $message, LogLevel::CRITICAL );
+            throw new \Exception( $message );
+        }
+        return $this->childComponents[ $handle ]->render()->content;
+    }
+
+    /**
+     * Using $this->props and $this->state, optionally update state and create/update child components via addOrUpdateChild().
      * @return void
      */
-    protected function update( $props ){
+    protected function updateState()
+    {
         //
     }
 
@@ -460,13 +452,25 @@ abstract class AbstractViewComponent
     }
 
     /**
+     * Update the full component view tree.
      *
+     * @var array $props
      */
-    public function updateProps( $props )
+    public function updateView( $props )
     {
-        $this->log( "Updating with props: ".var_export($props, true ), LogLevel::DEBUG );
-        $this->update( $props );
-        $this->state->validate();
+        $this->updateProps( $props );
+        $this->updateState();
+    }
+
+    /**
+     * Update the component's properties ('input') array
+     *
+     * @var array $props
+     */
+    protected function updateProps( $props )
+    {
+        $this->log( "Storing new props: " . var_export( $props, true ), LogLevel::DEBUG );
+        $this->props = $props;   
     }
 
     /**
