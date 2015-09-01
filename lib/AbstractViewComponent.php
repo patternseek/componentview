@@ -27,40 +27,33 @@ abstract class AbstractViewComponent
      * @var ExecHelper
      */
     public $exec;
-
     /**
      * Message to display when rendering component. Won't be serialised to will only be displayed once.
      * @var string
      */
-
     public $flashMessage;
-
     /**
      * Error to display when rendering component. Won't be serialised to will only be displayed once.
      * @var string
      */
     public $flashError;
-
     /**
      * If we have a parent in $parent, $handle is the parent's handle/identifier for us
      * @var string
      */
     public $handle;
-
-    /**
-     * @var AbstractViewComponent[]
-     */
-    public $childComponents = [ ];
-
     /**
      * @var ViewState An object containing state elements
      */
     protected $state;
-
     /**
      * @var AbstractViewComponent
      */
     protected $parent;
+    /**
+     * @var AbstractViewComponent[]
+     */
+    public $childComponents = [ ];
 
     /**
      * @var boolean[] Used to track which children are updated when update() is called. Those that aren't are pruned.
@@ -110,14 +103,35 @@ abstract class AbstractViewComponent
     }
 
     /**
+     * @param string $message
+     * @param string $level A constant from LogLevel
+     */
+    protected function log( $message, $level ){
+        if( isset( $this->logger ) ){
+            $class = get_class( $this );
+            $message = "[{$class}] {$message}";
+            $this->logger->log( $level, $message );
+        }
+    }
+
+    /**
+     * User this to serialise ViewComponents as extra steps may be added later.
+     * @return string
+     */
+    public function dehydrate(){
+        $this->log( "Dehydrating", LogLevel::DEBUG );
+        return serialize( $this );
+    }
+
+    /**
      * Use this to unserialise ViewComponents
      * @param $serialised
      * @param ExecHelper $execHelper
      * @param LoggerInterface $logger
      * @return AbstractViewComponent
      */
-    public static function rehydrate( $serialised, ExecHelper $execHelper, LoggerInterface $logger = null )
-    {
+    
+    public static function rehydrate( $serialised, ExecHelper $execHelper, LoggerInterface $logger = null ){
         /** @var AbstractViewComponent $view */
         $view = unserialize( $serialised );
         $view->setExec( $execHelper );
@@ -125,16 +139,6 @@ abstract class AbstractViewComponent
         $view->setLogger( $logger );
         $view->log( "Rehydrated", LogLevel::DEBUG );
         return $view;
-    }
-
-    /**
-     * User this to serialise ViewComponents as extra steps may be added later.
-     * @return string
-     */
-    public function dehydrate()
-    {
-        $this->log( "Dehydrating", LogLevel::DEBUG );
-        return serialize( $this );
     }
 
     /**
@@ -176,8 +180,7 @@ abstract class AbstractViewComponent
         // If we're called with an 'exec' then run it instead of rendering the whole tree.
         // It may still render the whole tree or it may just render a portion or just return JSON
         if ($execMethodName) { // Used to test for null but it could easily be an empty string
-            $this->log( "Rendering with exec: {$execMethodName}, args:" . var_export( $execArgs, true ),
-                LogLevel::DEBUG );
+            $this->log( "Rendering with exec: {$execMethodName}, args:".var_export($execArgs, true ), LogLevel::DEBUG );
             $out = $this->execMethod( $execMethodName, $execArgs );
         }else {
             $this->log( "Rendering without exec", LogLevel::DEBUG );
@@ -197,6 +200,7 @@ abstract class AbstractViewComponent
             #    }
             #}
             $this->updatedChildren = [ ];
+            
         }
         return $out;
     }
@@ -233,10 +237,6 @@ abstract class AbstractViewComponent
         return $out;
     }
 
-    /**
-     * @param $execMethod
-     * @return string
-     */
     public function getExecPath( $execMethod )
     {
         $path = $this->getPath();
@@ -250,6 +250,7 @@ abstract class AbstractViewComponent
     {
         return $this->parent;
     }
+
 
     /**
      * @param $string
@@ -279,56 +280,6 @@ abstract class AbstractViewComponent
             $cur = $cur->parent;
         }
         return $cur;
-    }
-
-    /**
-     * Can create a child component on this component and return it.
-     *
-     * @param string $handle
-     * @param string $type
-     * @param array $props
-     * @return AbstractViewComponent
-     * @throws \Exception
-     */
-    public function childComponent( $handle, $type, array $props = [ ] )
-    {
-        $this->log( "Adding child '{$handle}' of type {$type}", LogLevel::DEBUG );
-        if (!isset( $this->childComponents[ $handle ] )) {
-            if (!class_exists( $type )) {
-                throw new \Exception( "Class '{$type}' for sub-component  does not exist." );
-            }
-            $child = new $type( $handle, $this, $this->exec, $this->logger );
-            $this->childComponents[ $handle ] = $child;
-        }else {
-            // exec, di and logger are set recursively in rehydrate()
-            $child = $this->childComponents[ $handle ];
-        }
-        $child->updateProps( $props );
-        $this->updatedChildren[ $handle ] = true;
-        return $child->render()->content;
-    }
-
-    /**
-     *
-     */
-    public function updateProps( $props )
-    {
-        $this->log( "Updating with props: " . var_export( $props, true ), LogLevel::DEBUG );
-        $this->update( $props );
-        $this->state->validate();
-    }
-
-    /**
-     * @param string $message
-     * @param string $level A constant from LogLevel
-     */
-    protected function log( $message, $level )
-    {
-        if (isset( $this->logger )) {
-            $class = get_class( $this );
-            $message = "[{$class}] {$message}";
-            $this->logger->log( $level, $message );
-        }
     }
 
     /**
@@ -362,12 +313,38 @@ abstract class AbstractViewComponent
     }
 
     /**
+     * Can create a child component on this component and return it.
+     *
+     * @param string $handle
+     * @param string $type
+     * @param array $props
+     * @return AbstractViewComponent
+     * @throws \Exception
+     */
+    public function childComponent( $handle, $type, array $props = [ ] )
+    {
+        $this->log( "Adding child '{$handle}' of type {$type}", LogLevel::DEBUG );
+        if (!isset( $this->childComponents[ $handle ] )) {
+            if( ! class_exists( $type ) ){
+                throw new \Exception( "Class '{$type}' for sub-component  does not exist." );
+            }
+            $child = new $type( $handle, $this, $this->exec, $this->logger );
+            $this->childComponents[ $handle ] = $child;
+        }else {
+            // exec, di and logger are set recursively in rehydrate()
+            $child = $this->childComponents[ $handle ];
+        }
+        $child->updateProps( $props );
+        $this->updatedChildren[ $handle ] = true;
+        return $child->render()->content;
+    }
+
+    /**
      * Using $props and $this->state, optionally update state,.
      * @param array $props
      * @return void
      */
-    protected function update( $props )
-    {
+    protected function update( $props ){
         //
     }
 
@@ -407,19 +384,18 @@ abstract class AbstractViewComponent
      */
     protected function testInputs( array $inputSpec, array &$inputs )
     {
-
+        
         foreach ($inputSpec as $fieldName => $fieldSpec) {
-            $parentText = '';
             // Required field
             if (( count( $fieldSpec ) < 2 )) {
                 if (!isset( $inputs[ $fieldName ] )) {
-                    $calledFunc = debug_backtrace()[ 1 ][ 'function' ];
-                    $callerFunc = debug_backtrace()[ 2 ][ 'function' ];
-                    $callerClass = debug_backtrace()[ 2 ][ 'class' ];
-                    if ($this->parent !== null) {
-                        $parentText = " (parent component is " . get_class( $this->parent ) . ")";
+                    $calledFunc = debug_backtrace()[1]['function'];
+                    $callerFunc = debug_backtrace()[2]['function'];
+                    $callerClass = debug_backtrace()[2]['class'];
+                    if( $this->parent !== null ){
+                        $parentText = " (parent component is ".get_class($this->parent).")";
                     }
-                    throw new \Exception( $fieldName . " is a required field for " . get_class( $this ) . "::{$calledFunc}() called from {$callerClass}::{$callerFunc}(){$parentText}" );
+                    throw new \Exception( $fieldName . " is a required field for " . get_class( $this )."::{$calledFunc}() called from {$callerClass}::{$callerFunc}(){$parentText}" );
                 }
             }
             // Set default is unset
@@ -444,13 +420,13 @@ abstract class AbstractViewComponent
                         break;
                     case "integer":
                     case "int":
-                    $failed = !is_int( $input + 0 );
+                    $failed = !is_int( $input+0 );
                         break;
                     case "double":
-                        $failed = !is_double( $input + 0 );
+                        $failed = !is_double( $input+0 );
                         break;
                     case "float":
-                        $failed = !is_float( $input + 0 );
+                        $failed = !is_float( $input+0 );
                         break;
                     case "string":
                         $failed = !is_string( $input );
@@ -471,16 +447,26 @@ abstract class AbstractViewComponent
                         $failed = !( $input instanceof $requiredType );
                 }
                 if ($failed) {
-                    $calledFunc = debug_backtrace()[ 1 ][ 'function' ];
-                    $callerFunc = debug_backtrace()[ 2 ][ 'function' ];
-                    $callerClass = debug_backtrace()[ 2 ][ 'class' ];
-                    if ($this->parent !== null) {
-                        $parentText = " (parent component is " . get_class( $this->parent ) . ")";
+                    $calledFunc = debug_backtrace()[1]['function'];
+                    $callerFunc = debug_backtrace()[2]['function'];
+                    $callerClass = debug_backtrace()[2]['class'];
+                    if( $this->parent !== null ){
+                        $parentText = " (parent component is ".get_class($this->parent).")";
                     }
-                    throw new \Exception( $fieldName . " should be of type " . $requiredType . "in " . get_class( $this ) . "::{$calledFunc}() called from {$callerClass}::{$callerFunc}(){$parentText}" );
+                    throw new \Exception( $fieldName . " should be of type " . $requiredType . "in " . get_class( $this )."::{$calledFunc}() called from {$callerClass}::{$callerFunc}(){$parentText}" );
                 }
             }
         }
+    }
+
+    /**
+     *
+     */
+    public function updateProps( $props )
+    {
+        $this->log( "Updating with props: ".var_export($props, true ), LogLevel::DEBUG );
+        $this->update( $props );
+        $this->state->validate();
     }
 
     /**
