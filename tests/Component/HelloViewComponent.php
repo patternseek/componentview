@@ -34,8 +34,16 @@ class HelloViewComponent extends AbstractViewComponent{
     protected function initTemplate()
     {
         $tplTwig = <<<EOS
-Hello {{component( 'world' )}}
-An exec url {{ this.exec.url( "someExec", {'w1':'w1'} ) }}
+Hello {{
+this.childComponent( 
+    'world', 
+    "\\\\PatternSeek\\\\ComponentView\\\\Test\\\\Component\\\\WorldViewComponent",
+    {   
+        'name':state.name,
+        'intRequired':state.intRequired
+    }
+)}}
+An exec url {{ exec.url( "someExec", {'w1':'w1'} ) }}
 EOS;
 
         $this->template = new TwigTemplate( $this, null, $tplTwig );
@@ -76,14 +84,6 @@ EOS;
         $this->state->name = $props[ 'name' ];
         $this->state->intRequired = $props[ 'intRequired' ];
         
-        
-        $this->addOrUpdateChild(
-            "world", "\\PatternSeek\\ComponentView\\Test\\Component\\WorldViewComponent",
-            [   // This is just passing specific parent inputs to the child
-                'name' => $this->state->name,
-                'intRequired' => $this->state->intRequired
-            ]
-        );
         // Normally there might be processing here and $this->state might be populated or modified, but not in this case
 
     }

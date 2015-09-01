@@ -114,6 +114,8 @@ EOS;
         $log = new MemoryLogger();
         $view = new HelloViewComponent( null, null, null, $log );
         $view->updateProps( $props );
+        // You can't call an exec method on a sub-component that hasn't been rendered before
+        $view->render();
         $outObj = $view->render( "world.jsonMultiply", ['multiplier'=>3] ); // Multiplies multiplier * props['intRequired']
 
         //print_r( $log->messages );
@@ -149,6 +151,8 @@ EOS;
         $log = new MemoryLogger();
         $view = new HelloViewComponent( null, null, $execHelper, $log );
         $view->updateProps( $props );
+        // You can't call an exec method on a sub-component that hasn't been rendered before
+        $view->render();
         $outObj = $view->render( "world.setState", ['something'=>5] ); // Multiplies multiplier * props['intRequired']
         $this->assertEquals( "OK", $outObj->content );
         $viewSer = $view->dehydrate();
