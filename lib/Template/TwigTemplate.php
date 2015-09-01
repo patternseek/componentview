@@ -24,8 +24,7 @@ use Twig_LoaderInterface;
  * Class TwigTemplate
  * @package PatternSeek\ComponentView
  */
-class TwigTemplate extends AbstractTemplate
-{
+class TwigTemplate extends AbstractTemplate{
 
     /**
      * @var Twig_Environment
@@ -52,12 +51,7 @@ class TwigTemplate extends AbstractTemplate
      * @param null $templateString
      * @param ResourceRepository $repo
      */
-    public function __construct(
-        AbstractViewComponent $component,
-        $templatePath = null,
-        $templateString = null,
-        ResourceRepository $repo = null
-    ){
+    public function __construct( AbstractViewComponent $component, $templatePath=null, $templateString=null, ResourceRepository $repo = null ){
         parent::__construct( $component );
         $this->templatePath = $templatePath;
         $this->templateString = $templateString;
@@ -70,23 +64,20 @@ class TwigTemplate extends AbstractTemplate
 
     /**
      * @param array|ViewState $state
+     * @param array $componentOutputs
      * @return string
      * @internal param \PatternSeek\ComponentView\AbstractViewComponent[] $components
      */
-    protected function doRender( ViewState $state )
+    protected function doRender( ViewState $state, array $componentOutputs )
     {
-        // If puli plugin is available then add it.
-        if (class_exists( "Puli\\TwigExtension\\PuliExtension" ) && null !== $this->repo) {
-            $this->twig->addExtension( new PuliExtension( $this->repo ) );
-        }
+        $this->addToTwig( $componentOutputs );
 
         $rendered = $this->twig->render(
             $this->templateString?$this->templateString:$this->templatePath,
             [
                 'state' => $state,
                 'this' => $this->component,
-                'parent' => $this->component->getParent(),
-                'exec' => $this->component->exec
+                'parent' => $this->component->getParent()
             ] );
         return new ViewComponentResponse( "text/html", $rendered );
     }
@@ -94,12 +85,11 @@ class TwigTemplate extends AbstractTemplate
     /**
      * @return Twig_LoaderInterface
      */
-    protected function getLoader()
-    {
+    protected function getLoader(){
 
-        if (class_exists( "Puli\\TwigExtension\\PuliExtension" ) && null !== $this->repo) {
-            $loader = new \Twig_Loader_Chain( [ new PuliTemplateLoader( $this->repo ), new Twig_Loader_String() ] );
-        }else {
+        if( class_exists( "Puli\\TwigExtension\\PuliExtension" ) && null !== $this->repo ) {
+            $loader = new \Twig_Loader_Chain( [new PuliTemplateLoader( $this->repo ),new Twig_Loader_String() ] );
+        }else{
             $loader = new Twig_Loader_String();
         }
         return $loader;
@@ -117,4 +107,33 @@ class TwigTemplate extends AbstractTemplate
         $this->twig = new Twig_Environment( $loader, $config );
     }
 
+    /**
+     * @param array $componentOutputs
+     */
+    protected function addToTwig( array $componentOutputs )
+    {
+        // If puli plugin is available then add it.
+        if( class_exists( "Puli\\TwigExtension\\PuliExtension" ) && null !== $this->repo ){
+            $this->twig->addExtension(new PuliExtension($this->repo));
+        }
+        
+        // Function for calling static methods
+        $staticFunc = new \Twig_SimpleFunction('static', 
+            function ($class, $function, $args = array())
+            {
+                if (class_exists($class) && method_exists($class, $function))
+                    return call_user_func_array(array($class, $function), $args);
+                return null;
+            }
+        );
+        $this->twig->addFunction('static', $staticFunc );
+        
+        // This is defined here as this is where $components is available. It would be better in the superclass.
+        $componentRenderFunc =
+            function ( $name ) use ( $componentOutputs ){
+                return $componentOutputs[ $name ];
+            };
+
+        $this->twig->addFunction( 'component', new \Twig_Function_Function( $componentRenderFunc ) );
+    }
 }

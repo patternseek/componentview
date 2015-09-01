@@ -85,12 +85,12 @@ class WorldViewComponent extends AbstractViewComponent{
     {
         $tplTwig = <<<EOS
 World. From: {{state.name}}
-Exec URL: {{exec.url( 'someExec', {'a':1} )}}
+Exec URL: {{this.exec.url( 'someExec', {'a':1} )}}
 {% set formBody %}
 <input type="text" name="someInput" value="2">
 {% endset %}
 Exec Form:
-{{ exec.wrapForm( 'otherExec', 'POST', formBody ) }}
+{{ this.exec.wrapForm( 'otherExec', 'POST', formBody ) }}
 EOS;
         $this->template = new TwigTemplate( $this, null, $tplTwig );
     }
