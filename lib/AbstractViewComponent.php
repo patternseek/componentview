@@ -173,7 +173,7 @@ abstract class AbstractViewComponent
             $out = $this->execMethod( $execMethodName, $execArgs );
         }else {
             $this->log( "Rendering without exec", LogLevel::DEBUG );
-            $out = $this->template->render( $this->state );
+            $out = $this->template->render( $this->state, $this->props );
             if (!( $out instanceof ViewComponentResponse )) {
                 throw new \Exception( get_class( $this->template ) . " returned invalid response. Should have been an instance of ViewComponentResponse" );
             }

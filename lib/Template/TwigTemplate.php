@@ -70,10 +70,10 @@ class TwigTemplate extends AbstractTemplate
 
     /**
      * @param array|ViewState $state
+     * @param array $props
      * @return string
-     * @internal param \PatternSeek\ComponentView\AbstractViewComponent[] $components
      */
-    protected function doRender( ViewState $state )
+    protected function doRender( ViewState $state, array $props = [] )
     {
         // If puli plugin is available then add it.
         if (class_exists( "Puli\\TwigExtension\\PuliExtension" ) && null !== $this->repo) {
@@ -84,6 +84,7 @@ class TwigTemplate extends AbstractTemplate
             $this->templateString?$this->templateString:$this->templatePath,
             [
                 'state' => $state,
+                'props' => $props,
                 'this' => $this->component,
                 'parent' => $this->component->getParent(),
                 'exec' => $this->component->exec

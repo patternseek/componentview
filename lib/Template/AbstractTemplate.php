@@ -41,18 +41,19 @@ abstract class AbstractTemplate{
     /**
      *
      * @param ViewState $state
+     * @param array $props
      * @return string
      */
-    public function render( ViewState $state )
+    public function render( ViewState $state, array $props = [] )
     {
-        return $this->doRender( $state );
+        return $this->doRender( $state, $props );
     }
 
     /**
      * @param array|ViewState $state
+     * @param array $props
      * @return string
-     * @internal param array $props
      */
-    abstract protected function doRender( ViewState $state );
+    abstract protected function doRender( ViewState $state, array $props = [] );
 
 }
