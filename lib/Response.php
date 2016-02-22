@@ -11,7 +11,7 @@
 namespace PatternSeek\ComponentView;
 
 /**
- * Class ViewComponentResponse
+ * Class Response
  */
 class Response
 {
