@@ -37,7 +37,7 @@ class Response
         $this->content = $content;
         
         // Response code defaults
-        if( null == $responseCode ){
+        if (null === $responseCode) {
             if( $type == "redirect" ){
                 $responseCode = 302;
             }else{
