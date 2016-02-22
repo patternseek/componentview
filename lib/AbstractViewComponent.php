@@ -159,7 +159,7 @@ abstract class AbstractViewComponent
      * @param string|null $execMethodName An optional method on this or a subcomponent to execute before rendering
      * @param array|null $execArgs
      * @throws \Exception
-     * @return ViewComponentResponse
+     * @return Response
      */
     public function render( $execMethodName = null, array $execArgs = null )
     {
@@ -174,7 +174,7 @@ abstract class AbstractViewComponent
         }else {
             $this->log( "Rendering without exec", LogLevel::DEBUG );
             $out = $this->template->render( $this->state, $this->props );
-            if (!( $out instanceof ViewComponentResponse )) {
+            if (!( $out instanceof Response )) {
                 throw new \Exception( get_class( $this->template ) . " returned invalid response. Should have been an instance of ViewComponentResponse" );
             }
         }
@@ -187,7 +187,7 @@ abstract class AbstractViewComponent
      * @param array|string $methodName A methodname in the format subComponent.anotherSubComponent.methodName. Either dotted string as described, or parts in an array. The top level page component shouldn't be included
      * @param array $args
      * @throws \Exception
-     * @return ViewComponentResponse
+     * @return Response
      */
     protected function execMethod( $methodName, array $args = null )
     {
@@ -206,7 +206,7 @@ abstract class AbstractViewComponent
                 throw new \Exception( implode( ".", $methodName ) . " is not a valid method." );
             }
         }
-        if (!( $out instanceof ViewComponentResponse )) {
+        if (!( $out instanceof Response )) {
             $nameStr = is_array( $methodName )?implode( ".", $methodName ):$methodName;
             throw new \Exception( $nameStr . " returned invalid response. Should have been an instance of ViewComponentResponse" );
         }
@@ -318,7 +318,7 @@ abstract class AbstractViewComponent
      * Render a child component.
      *
      * @param $handle
-     * @return ViewComponentResponse
+     * @return Response
      * @throws \Exception
      */
     public function renderChild( $handle )

@@ -4,7 +4,7 @@ namespace PatternSeek\ComponentView\Test\Component;
 use PatternSeek\ComponentView\AbstractViewComponent;
 use PatternSeek\ComponentView\Template\TwigTemplate;
 use PatternSeek\ComponentView\Test\ViewState\WorldState;
-use PatternSeek\ComponentView\ViewComponentResponse;
+use PatternSeek\ComponentView\Response;
 
 /**
  * Class WorldViewComponent
@@ -45,32 +45,32 @@ class WorldViewComponent extends AbstractViewComponent{
 
     /**
      * @param $args
-     * @return ViewComponentResponse
+     * @return Response
      * @throws \Exception
      */
     protected function jsonMultiplyHandler( $args ){
         $this->testInputs( ['multiplier'=>['int']], $args );
         $resInt = $this->state->intRequired * $args[ 'multiplier' ];
-        return new ViewComponentResponse( "application/json", json_encode( ['result'=>$resInt] ) );
+        return new Response( "application/json", json_encode( ['result'=>$resInt] ) );
     }
 
     /**
      * @param $args
-     * @return ViewComponentResponse
+     * @return Response
      * @throws \Exception
      */
     protected function setStateHandler( $args ){
         $this->testInputs( ['something'=>['int']], $args );
         $this->state->testProp = $args[ 'something' ];
-        return new ViewComponentResponse( "text/plain", "OK" );
+        return new Response( "text/plain", "OK" );
     }
 
     /**
      * @param $args
-     * @return ViewComponentResponse
+     * @return Response
      */
     protected function getStateHandler( $args ){
-        return new ViewComponentResponse( "text/plain", $this->state->testProp );
+        return new Response( "text/plain", $this->state->testProp );
     }
 
     /**
