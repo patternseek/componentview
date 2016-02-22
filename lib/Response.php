@@ -39,7 +39,7 @@ class Response
         // Response code defaults
         if( null == $responseCode ){
             if( $type == "redirect" ){
-                $responseCode = 301;
+                $responseCode = 302;
             }else{
                 $responseCode = 200;
             }
