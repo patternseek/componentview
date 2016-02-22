@@ -13,25 +13,37 @@ namespace PatternSeek\ComponentView;
 /**
  * Class ViewComponentResponse
  */
-class ViewComponentResponse
+class Response
 {
 
     /**
+     * Currently one of "redirect" or a valid MIME type.
      * @var string
      */
-    public $mime;
+    public $type;
     /**
      * @var string
      */
     public $content;
 
     /**
-     * @param $mime
+     * @param $type
      * @param $content
+     * @param null $responseCode
      */
-    function __construct( $mime, $content )
+    function __construct( $type, $content, $responseCode = null )
     {
-        $this->mime = $mime;
+        $this->type = $type;
         $this->content = $content;
+        
+        // Response code defaults
+        if( null == $responseCode ){
+            if( $type == "redirect" ){
+                $responseCode = 301;
+            }else{
+                $responseCode = 200;
+            }
+        }
+        $this->responseCode = $responseCode;
     }
 }

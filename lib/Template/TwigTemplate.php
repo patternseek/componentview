@@ -10,7 +10,7 @@
 namespace PatternSeek\ComponentView\Template;
 
 use PatternSeek\ComponentView\AbstractViewComponent;
-use PatternSeek\ComponentView\ViewComponentResponse;
+use PatternSeek\ComponentView\Response;
 use PatternSeek\ComponentView\ViewState\ViewState;
 use Puli\Repository\Api\ResourceRepository;
 use Puli\TwigExtension\PuliExtension;
@@ -89,7 +89,7 @@ class TwigTemplate extends AbstractTemplate
                 'parent' => $this->component->getParent(),
                 'exec' => $this->component->exec
             ] );
-        return new ViewComponentResponse( "text/html", $rendered );
+        return new Response( "text/html", $rendered );
     }
 
     /**
