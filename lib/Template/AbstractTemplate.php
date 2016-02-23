@@ -11,6 +11,7 @@
 namespace PatternSeek\ComponentView\Template;
 
 use PatternSeek\ComponentView\AbstractViewComponent;
+use PatternSeek\ComponentView\Response;
 use PatternSeek\ComponentView\ViewState\ViewState;
 
 /**
@@ -52,7 +53,7 @@ abstract class AbstractTemplate{
     /**
      * @param array|ViewState $state
      * @param array $props
-     * @return string
+     * @return Response
      */
     abstract protected function doRender( ViewState $state, array $props = [] );
 

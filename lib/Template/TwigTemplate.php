@@ -69,9 +69,9 @@ class TwigTemplate extends AbstractTemplate
     }
 
     /**
-     * @param array|ViewState $state
+     * @param ViewState $state
      * @param array $props
-     * @return string
+     * @return Response
      */
     protected function doRender( ViewState $state, array $props = [] )
     {
