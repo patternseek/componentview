@@ -11,7 +11,11 @@
 namespace PatternSeek\ComponentView;
 
 /**
- * Class ViewComponentResponse
+ * Class Response
+ */
+/**
+ * Class Response
+ * @package PatternSeek\ComponentView
  */
 class Response
 {
@@ -27,9 +31,14 @@ class Response
     public $content;
 
     /**
-     * @param $type
-     * @param $content
-     * @param null $responseCode
+     * @var int
+     */
+    public $responseCode;
+
+    /**
+     * @param string $type
+     * @param string $content
+     * @param int|null $responseCode
      */
     function __construct( $type, $content, $responseCode = null )
     {
@@ -37,7 +46,7 @@ class Response
         $this->content = $content;
         
         // Response code defaults
-        if( null == $responseCode ){
+        if (null === $responseCode) {
             if( $type == "redirect" ){
                 $responseCode = 302;
             }else{

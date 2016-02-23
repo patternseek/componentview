@@ -213,6 +213,10 @@ abstract class AbstractViewComponent
         return $out;
     }
 
+    /**
+     * @param $execMethod
+     * @return string
+     */
     public function getExecPath( $execMethod )
     {
         $path = $this->getPath();
@@ -384,6 +388,7 @@ abstract class AbstractViewComponent
                     $calledFunc = debug_backtrace()[1]['function'];
                     $callerFunc = debug_backtrace()[2]['function'];
                     $callerClass = debug_backtrace()[2]['class'];
+                    $parentText = '';
                     if( $this->parent !== null ){
                         $parentText = " (parent component is ".get_class($this->parent).")";
                     }
@@ -402,7 +407,6 @@ abstract class AbstractViewComponent
             $requiredType = $fieldSpec[ 0 ];
             $input = $inputs[ $fieldName ];
             // Specific type required
-            $failed = true;
             // Null is allowed
             if (!is_null( $input )) {
                 switch ($requiredType) {
@@ -442,6 +446,7 @@ abstract class AbstractViewComponent
                     $calledFunc = debug_backtrace()[1]['function'];
                     $callerFunc = debug_backtrace()[2]['function'];
                     $callerClass = debug_backtrace()[2]['class'];
+                    $parentText = '';
                     if( $this->parent !== null ){
                         $parentText = " (parent component is ".get_class($this->parent).")";
                     }
@@ -485,6 +490,9 @@ abstract class AbstractViewComponent
         }
     }
 
+    /**
+     *
+     */
     private function handleDependencyInjection()
     {
         // It's a little strange that the object injects its own
