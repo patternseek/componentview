@@ -13,6 +13,10 @@ namespace PatternSeek\ComponentView;
 /**
  * Class Response
  */
+/**
+ * Class Response
+ * @package PatternSeek\ComponentView
+ */
 class Response
 {
 
@@ -27,9 +31,14 @@ class Response
     public $content;
 
     /**
-     * @param $type
-     * @param $content
-     * @param null $responseCode
+     * @var int
+     */
+    public $responseCode;
+
+    /**
+     * @param string $type
+     * @param string $content
+     * @param int|null $responseCode
      */
     function __construct( $type, $content, $responseCode = null )
     {
