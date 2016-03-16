@@ -75,7 +75,7 @@ class AbstractViewComponentTest extends \PHPUnit_Framework_TestCase {
 Hello World. From: someone
 Exec URL: ?a=1&exec=world.someExec
 Exec Form:
-<form method="POST" action="">
+<form method="POST" action="" enctype="application/x-www-form-urlencoded">
     <input type="hidden" name="exec" value="world.otherExec">
     <input type="text" name="someInput" value="2">
 
