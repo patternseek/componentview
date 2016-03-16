@@ -46,6 +46,7 @@ class ExecHelper
      * @param bool $onlyComponentOutput
      * @param null $formID
      * @param null $onSubmit
+     * @param string $encType
      * @return string HTML form
      */
     public function wrapForm(
@@ -54,7 +55,8 @@ class ExecHelper
         $formBody,
         $onlyComponentOutput = false, // Not used in this implementation but necessary for subclasses
         $formID = null,
-        $onSubmit = null
+        $onSubmit = null,
+        $encType = 'application/x-www-form-urlencoded'
     )
     {
         // $onlyComponentOutput is not used in this implementation but may be by sub-classes
@@ -65,7 +67,7 @@ class ExecHelper
             $onSubmit = " onsubmit='{$onSubmit}'";
         }
         return <<<EOS
-<form method="{$method}" action=""{$formID}{$onSubmit}>
+<form method="{$method}" action=""{$formID}{$onSubmit} enctype="{$encType}">
     <input type="hidden" name="exec" value="{$this->component->getExecPath( $execMethod )}">
     {$formBody}
 </form>
@@ -133,13 +135,14 @@ EOS;
      * @param string $formBody The body of an HTML form to be wrapped
      * @param $targetDiv
      * @param $formID
+     * @param string $encType
      * @return string
      */
-    public function replaceElementUsingForm( $execMethod, $method, $formBody, $targetDiv, $formID )
+    public function replaceElementUsingForm( $execMethod, $method, $formBody, $targetDiv, $formID, $encType = 'application/x-www-form-urlencoded' )
     {
         return <<<EOS
         {$this->wrapForm( $execMethod, $method, $formBody, true, $formID,
-            "execForm( this, \"{$targetDiv}\" ); return false;" )}
+            "execForm( this, \"{$targetDiv}\" ); return false;", $encType )}
         <script type="application/javascript">
         if( typeof(execForm) != "function" ){
             var execForm = function( form, targetDiv ){
