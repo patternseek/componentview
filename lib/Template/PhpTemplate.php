@@ -107,7 +107,7 @@ class PhpTemplate extends AbstractTemplate
         if ($this->repo instanceof ResourceRepository) {
             if ($this->repo->contains( $templatePath )) {
                 return $this->repo->get( $templatePath )
-                    ->getPath();
+                    ->getFilesystemPath();
             }
         }
         if (file_exists( $templatePath )) {
