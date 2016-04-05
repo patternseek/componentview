@@ -2,9 +2,9 @@
 namespace PatternSeek\ComponentView\Test\Component;
 
 use PatternSeek\ComponentView\AbstractViewComponent;
+use PatternSeek\ComponentView\Response;
 use PatternSeek\ComponentView\Template\TwigTemplate;
 use PatternSeek\ComponentView\Test\ViewState\WorldState;
-use PatternSeek\ComponentView\Response;
 
 /**
  * Class WorldViewComponent
@@ -29,6 +29,12 @@ class WorldViewComponent extends AbstractViewComponent{
     protected function updateState()
     {
         $props = $this->props;
+
+        if ($props[ 'doForceResponseWorld' ] == true) {
+            $this->getRootComponent()
+                ->forceResponse( new Response( "redirect", 302 ) );
+            return;
+        }
 
         $this->testInputs(
             [

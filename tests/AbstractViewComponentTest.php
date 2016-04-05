@@ -11,6 +11,7 @@ namespace PatternSeek\ComponentView\Test;
 
 use PatternSeek\ComponentView\AbstractViewComponent;
 use PatternSeek\ComponentView\ExecHelper;
+use PatternSeek\ComponentView\Response;
 use PatternSeek\ComponentView\Test\Component\HelloViewComponent;
 use PatternSeek\DependencyInjector\DependencyInjector;
 use Pimple\Container;
@@ -32,6 +33,57 @@ class AbstractViewComponentTest extends \PHPUnit_Framework_TestCase {
         DependencyInjector::init( new Container() );
     }
 
+    function testForceResponse()
+    {
+
+        // Optional off
+        $props =
+            [
+                'doForceResponse' => true,
+            ];
+        $log = new MemoryLogger();
+        $view = new HelloViewComponent( null, null, null, $log );
+        $view->updateView( $props );
+        $outObj = $view->render();
+
+        $expected = new Response( "redirect", 301 );
+
+        $this->assertEquals( $expected, $outObj );
+    }
+
+    function testForceResponseInChild()
+    {
+
+        $props =
+            [
+                'doForceResponseWorld' => true,
+
+                'anyTypeRequired' => 1,
+                'anyTypeRequired2' => 2,
+                'boolRequired' => true,
+                'boolRequired2' => false,
+                'intRequired' => 4,
+                'doubleRequired' => 1.1,
+                'floatRequired' => 1.2,
+                'stringRequired' => 'string',
+                'name' => 'someone',
+                'arrayRequired' => [ ],
+                'objectRequired' => new SomeClass(),
+                'resourceRequired' => fopen( "/tmp", 'r' ),
+                'callableRequired' => function (){
+                },
+                'SomeClassRequired' => new SomeClass()
+            ];
+        $log = new MemoryLogger();
+        $view = new HelloViewComponent( null, null, null, $log );
+        $view->updateView( $props );
+        $outObj = $view->render();
+
+        $expected = new Response( "redirect", 302 );
+
+        $this->assertEquals( $expected, $outObj );
+    }
+    
     function testRender(){
         
         // Optional off
