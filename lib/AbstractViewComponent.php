@@ -71,6 +71,13 @@ abstract class AbstractViewComponent
     protected $props;
 
     /**
+     * If set the render() will skip any processing and immediately return this response
+     *
+     * @var Response
+     */
+    private $forceResponse;
+
+    /**
      * @param null $handle
      * @param AbstractViewComponent $parent
      * @param ExecHelper $execHelper
@@ -164,6 +171,13 @@ abstract class AbstractViewComponent
     public function render( $execMethodName = null, array $execArgs = null )
     {
         $this->state->validate();
+
+        // updateState() on any component can call $this->getRootComponent()->forceResponse()
+        // to force a particular response, usually a redirect.
+        if (null !== $this->forceResponse) {
+            return $this->forceResponse;
+        }
+        
         $this->initTemplate();
 
         // If we're called with an 'exec' then run it instead of rendering the whole tree.
@@ -476,6 +490,11 @@ abstract class AbstractViewComponent
     {
         $this->log( "Storing new props: " . var_export( $props, true ), LogLevel::DEBUG );
         $this->props = $props;   
+    }
+
+    protected function forceResponse( Response $response )
+    {
+        $this->forceResponse = $response;
     }
 
     /**
