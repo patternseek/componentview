@@ -73,9 +73,11 @@ EOS;
         
         // Normally there might be processing here and $this->state might be populated or modified, but not in this case
 
+        $childComponent = isset( $props[ 'alternateChildComponent' ] )?$props[ 'alternateChildComponent' ]:"\\PatternSeek\\ComponentView\\Test\\Component\\WorldViewComponent";
+        
         $this->addOrUpdateChild(
             'world',
-            "\\PatternSeek\\ComponentView\\Test\\Component\\WorldViewComponent",
+            $childComponent,
             [
                 'name' => $this->state->name,
                 'intRequired' => $this->state->intRequired

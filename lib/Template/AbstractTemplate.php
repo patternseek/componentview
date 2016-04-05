@@ -43,7 +43,7 @@ abstract class AbstractTemplate{
      *
      * @param ViewState $state
      * @param array $props
-     * @return string
+     * @return Response
      */
     public function render( ViewState $state, array $props = [] )
     {
