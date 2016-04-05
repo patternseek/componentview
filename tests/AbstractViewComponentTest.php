@@ -62,14 +62,6 @@ class AbstractViewComponentTest extends \PHPUnit_Framework_TestCase {
         $view->execFormHelper = function (){
         };
         $outObj = $view->render();
-        
-        //print_r( $log->messages );
-
-#        print_r( $out );
-#        print_r( $view );
-#        $frozen = serialize( $view );
-#        $defrosted = unserialize( $frozen );
-#        print_r( $defrosted );
 
         $expected = <<<EOS
 Hello World. From: someone
@@ -84,7 +76,98 @@ An exec url ?w1=w1&exec=someExec
 EOS;
         file_put_contents( "/tmp/out", $outObj->content );
         $this->assertEquals( $expected, $outObj->content );
+    }
 
+    function testPhpTemplateString()
+    {
+
+        // Optional off
+        $props =
+            [
+                'anyTypeRequired' => 1,
+                'anyTypeRequired2' => 2,
+                'boolRequired' => true,
+                'boolRequired2' => false,
+                'intRequired' => 4,
+                'doubleRequired' => 1.1,
+                'floatRequired' => 1.2,
+                'stringRequired' => 'string',
+                'name' => 'someone',
+                'arrayRequired' => [ ],
+                'objectRequired' => new SomeClass(),
+                'resourceRequired' => fopen( "/tmp", 'r' ),
+                'callableRequired' => function (){
+                },
+                'SomeClassRequired' => new SomeClass(),
+
+                'alternateChildComponent' => "\\PatternSeek\\ComponentView\\Test\\Component\\WorldViewComponentPhpTemplateString"
+                // Load alternate child component
+            ];
+        $log = new MemoryLogger();
+        $view = new HelloViewComponent( null, null, null, $log );
+        $view->updateView( $props );
+        $view->execFormHelper = function (){
+        };
+        $outObj = $view->render();
+        $expected = <<<EOS
+Hello World. From: someone
+Exec URL: ?a=1&exec=world.someExec
+Exec Form:
+<form method="POST" action="" enctype="application/x-www-form-urlencoded">
+    <input type="hidden" name="exec" value="world.otherExec">
+    <input type="text" name="someInput" value="2">
+
+</form>
+An exec url ?w1=w1&exec=someExec
+EOS;
+        file_put_contents( "/tmp/out", $outObj->content );
+        $this->assertEquals( $expected, $outObj->content );
+    }
+
+    function testPhpTemplateFile()
+    {
+
+        // Optional off
+        $props =
+            [
+                'anyTypeRequired' => 1,
+                'anyTypeRequired2' => 2,
+                'boolRequired' => true,
+                'boolRequired2' => false,
+                'intRequired' => 4,
+                'doubleRequired' => 1.1,
+                'floatRequired' => 1.2,
+                'stringRequired' => 'string',
+                'name' => 'someone',
+                'arrayRequired' => [ ],
+                'objectRequired' => new SomeClass(),
+                'resourceRequired' => fopen( "/tmp", 'r' ),
+                'callableRequired' => function (){
+                },
+                'SomeClassRequired' => new SomeClass(),
+
+                'alternateChildComponent' => "\\PatternSeek\\ComponentView\\Test\\Component\\WorldViewComponentPhpTemplateFile"
+                // Load alternate child component
+            ];
+        $log = new MemoryLogger();
+        $view = new HelloViewComponent( null, null, null, $log );
+        $view->updateView( $props );
+        $view->execFormHelper = function (){
+        };
+        $outObj = $view->render();
+        $expected = <<<EOS
+Hello World. From: someone
+Exec URL: ?a=1&exec=world.someExec
+Exec Form:
+<form method="POST" action="" enctype="application/x-www-form-urlencoded">
+    <input type="hidden" name="exec" value="world.otherExec">
+    <input type="text" name="someInput" value="2">
+
+</form>
+An exec url ?w1=w1&exec=someExec
+EOS;
+        file_put_contents( "/tmp/out", $outObj->content );
+        $this->assertEquals( $expected, $outObj->content );
     }
 
     function testNestedExecJSON(){
