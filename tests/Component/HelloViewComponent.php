@@ -46,7 +46,7 @@ EOS;
     {
         $props = $this->props;
 
-        if ($props[ 'doForceResponse' ] == true) {
+        if (isset( $props[ 'doForceResponse' ] )) {
             $this->getRootComponent()
                 ->forceResponse( new Response( "redirect", 301 ) );
             return;
