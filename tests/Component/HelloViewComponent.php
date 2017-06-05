@@ -2,6 +2,7 @@
 namespace PatternSeek\ComponentView\Test\Component;
 
 use PatternSeek\ComponentView\AbstractViewComponent;
+use PatternSeek\ComponentView\Response;
 use PatternSeek\ComponentView\Template\TwigTemplate;
 use PatternSeek\ComponentView\Test\SomeClass;
 use PatternSeek\ComponentView\Test\ViewState\HelloState;
@@ -45,6 +46,12 @@ EOS;
     {
         $props = $this->props;
 
+        if ($props[ 'doForceResponse' ] == true) {
+            $this->getRootComponent()
+                ->forceResponse( new Response( "redirect", 301 ) );
+            return;
+        }
+
         $this->testInputs(
             [
                 'anyTypeRequired' => [ ],
@@ -78,7 +85,8 @@ EOS;
             "\\PatternSeek\\ComponentView\\Test\\Component\\WorldViewComponent",
             [
                 'name' => $this->state->name,
-                'intRequired' => $this->state->intRequired
+                'intRequired' => $this->state->intRequired,
+                'doForceResponseWorld' => $props[ 'doForceResponseWorld' ]
             ]
         );
         
