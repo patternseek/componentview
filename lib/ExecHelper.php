@@ -81,7 +81,7 @@ EOS;
      * @param array $args
      * @return mixed|null
      */
-    function callStatic($class, $function, $args = array())
+    public function callStatic($class, $function, $args = array())
     {
         if (class_exists($class) && method_exists($class, $function)) {
             return call_user_func_array( array( $class, $function ), $args );
