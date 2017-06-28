@@ -40,7 +40,7 @@ class Response
      * @param string $content
      * @param int|null $responseCode
      */
-    function __construct( $type, $content, $responseCode = null )
+    public function __construct( $type, $content, $responseCode = null )
     {
         $this->type = $type;
         $this->content = $content;
