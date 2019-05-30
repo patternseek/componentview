@@ -539,4 +539,11 @@ abstract class AbstractViewComponent
             }
         }
     }
+
+    /**
+     * @return LoggerInterface
+     */
+    protected function getLogger(){
+        return $this->logger;
+    }
 }
