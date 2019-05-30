@@ -189,7 +189,7 @@ abstract class AbstractViewComponent
             $this->log( "Rendering without exec", LogLevel::DEBUG );
             $out = $this->template->render( $this->state, $this->props );
             if (!( $out instanceof Response )) {
-                throw new \Exception( get_class( $this->template ) . " returned invalid response. Should have been an instance of ViewComponentResponse" );
+                throw new \Exception( get_class( $this->template ) . " returned invalid response. Should have been an instance of PatternSeek\ComponentView\Response" );
             }
         }
         return $out;
@@ -222,7 +222,7 @@ abstract class AbstractViewComponent
         }
         if (!( $out instanceof Response )) {
             $nameStr = is_array( $methodName )?implode( ".", $methodName ):$methodName;
-            throw new \Exception( $nameStr . " returned invalid response. Should have been an instance of ViewComponentResponse" );
+            throw new \Exception( $nameStr . " returned invalid response. Should have been an instance of PatternSeek\ComponentView\Response" );
         }
         return $out;
     }
@@ -538,5 +538,12 @@ abstract class AbstractViewComponent
                 $child->setLogger( $logger );
             }
         }
+    }
+
+    /**
+     * @return LoggerInterface
+     */
+    protected function getLogger(){
+        return $this->logger;
     }
 }
