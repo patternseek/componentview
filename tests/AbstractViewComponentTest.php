@@ -15,6 +15,8 @@ use PatternSeek\ComponentView\Response;
 use PatternSeek\ComponentView\Test\Component\HelloViewComponent;
 use PatternSeek\DependencyInjector\DependencyInjector;
 use Pimple\Container;
+use PHPUnit\Framework\TestCase;
+
 
 /**
  * Class SomeClass
@@ -26,9 +28,9 @@ class SomeClass{}
  * Class AbstractViewComponentTest
  * @package PatternSeek\ComponentView\Test
  */
-class AbstractViewComponentTest extends \PHPUnit_Framework_TestCase {
+class AbstractViewComponentTest extends TestCase {
 
-    protected function setUp()
+    protected function setUp() : void
     {
         DependencyInjector::init( new Container() );
     }
