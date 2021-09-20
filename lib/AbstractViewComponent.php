@@ -20,7 +20,7 @@ use Psr\Log\LogLevel;
  * Class AbstractViewComponent
  * @package PatternSeek\ComponentView
  */
-abstract class AbstractViewComponent
+abstract class AbstractViewComponent implements \JsonSerializable
 {
 
     /**
@@ -113,38 +113,46 @@ abstract class AbstractViewComponent
      * @param string $message
      * @param string $level A constant from LogLevel
      */
-    protected function log( $message, $level ){
+    protected function log( $message, $level, $context = [] ){
         if( isset( $this->logger ) ){
             $class = get_class( $this );
             $message = "[{$class}] {$message}";
-            $this->logger->log( $level, $message );
+            if( ! is_array($context) ){
+                $context = [$context];
+            }
+            $this->logger->log( $level, $message, $context );
         }
     }
 
     /**
      * User this to serialise ViewComponents as extra steps may be added later.
+     * Note that we have implemented __sleep() so not all members are serialised.
      * @return string
      */
     public function dehydrate(){
-        $this->log( "Dehydrating", LogLevel::DEBUG );
-        return serialize( $this );
+        $ser = serialize($this);
+        // We have to unserialise the serialised object here because it's stripped down to only the required properties by __sleep()
+        $this->log( "Dehydrating", LogLevel::DEBUG, [unserialize($ser)] );
+        return $ser;
     }
 
     /**
      * Use this to unserialise ViewComponents
+     * Note that we have implemented __sleep() so not all members are serialised.
      * @param $serialised
      * @param ExecHelper $execHelper
      * @param LoggerInterface $logger
      * @return AbstractViewComponent
      */
-    
     public static function rehydrate( $serialised, ExecHelper $execHelper, LoggerInterface $logger = null ){
         /** @var AbstractViewComponent $view */
         $view = unserialize( $serialised );
+        if( null !== $logger ){
+            $logger->log( LogLevel::DEBUG, "Rehydrating", [$view] );
+        }
         $view->setExec( $execHelper );
         $view->handleDependencyInjection();
         $view->setLogger( $logger );
-        $view->log( "Rehydrated", LogLevel::DEBUG );
         return $view;
     }
 
@@ -159,6 +167,23 @@ abstract class AbstractViewComponent
             'parent',
             'state'
         ];
+    }
+
+    /**
+     * Implement JsonSerializable interface, for logging mainly
+     * @return mixed
+     */
+    public function jsonSerialize() {
+        $ret = [];
+        // Return the same fields as __sleep() specifies for serialize()
+        foreach ( $this->__sleep() as $member ){
+            // Skip parent because recursion isn't supported
+            if( $member == 'parent'){
+                continue;
+            }
+            $ret[$member] = $this->$member;
+        }
+        return $ret;
     }
 
     /**
@@ -488,7 +513,7 @@ abstract class AbstractViewComponent
      */
     protected function updateProps( $props )
     {
-        $this->log( "Storing new props: " . var_export( $props, true ), LogLevel::DEBUG );
+        $this->log( "Storing new props: ", LogLevel::DEBUG,  var_export( $props, true ) );
         $this->props = $props;   
     }
 
