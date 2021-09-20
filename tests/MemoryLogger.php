@@ -65,14 +65,29 @@ class MemoryLogger extends AbstractLogger implements LoggerInterface
      */
     protected function interpolate($message, array $context = array())
     {
-        // build a replacement array with braces around the context keys
-        $replace = array();
-        foreach ($context as $key => $val) {
-            $replace['{' . $key . '}'] = $val;
+        if( count( $context ) < 1 ){
+            return $message;
         }
-
-        // interpolate replacement values into the message and return
-        return strtr($message, $replace);
+        
+        // Cheaply check for string interpolation markers. This is dirty but we can't afford loads of processing here
+        if( false !== strstr( $message, '{' ) && false !== strstr( $message, '}' ) ){
+            // build a replacement array with braces around the context keys
+            $replace = array();
+            foreach ($context as $key => $val) {
+                // Only if it can be converted to string
+                if( !( method_exists($val, '__toString') || $val === null || is_scalar($val) ) ){
+                    continue;
+                }
+                $replace['{' . $key . '}'] = $val;
+            }
+            // interpolate replacement values into the message and return
+            $message =  strtr($message, $replace);            
+        }else{
+            // Attach context for messages that don't use interpolation
+            $message .= " Context: ".str_replace("\n", '\n', json_encode($context) ); // If this json encode fails it may be because there's recursion
+        }
+        
+        return $message;
     }
     
 }
