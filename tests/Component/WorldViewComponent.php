@@ -30,7 +30,7 @@ class WorldViewComponent extends AbstractViewComponent{
     {
         $props = $this->props;
 
-        if ($props[ 'doForceResponseWorld' ] == true) {
+        if (isset( $props[ 'doForceResponseWorld' ] ) && $props[ 'doForceResponseWorld' ] == true) {
             $this->getRootComponent()
                 ->forceResponse( new Response( "redirect", 302 ) );
             return;
