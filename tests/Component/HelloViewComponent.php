@@ -88,7 +88,7 @@ EOS;
             [
                 'name' => $this->state->name,
                 'intRequired' => $this->state->intRequired,
-                'doForceResponseWorld' => $props[ 'doForceResponseWorld' ]
+                'doForceResponseWorld' => $props[ 'doForceResponseWorld' ]??null
             ]
         );
         
