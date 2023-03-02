@@ -25,7 +25,7 @@ use Psr\Log\LogLevel;
 abstract class AbstractViewComponent implements \JsonSerializable
 {
 
-    public ?ExecHelper $exec;
+    public ?ExecHelper $exec = null;
     /**
      * Message to display when rendering component. Won't be serialised to will only be displayed once.
      */
