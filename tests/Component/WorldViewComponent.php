@@ -15,7 +15,7 @@ class WorldViewComponent extends AbstractViewComponent{
     /**
      * @var WorldState
      */
-    protected $state;
+    protected \PatternSeek\ComponentView\ViewState\ViewState $state;
 
     /**
      * Initialise $this->state with either a new ViewState or an appropriate subclass

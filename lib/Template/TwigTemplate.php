@@ -15,10 +15,10 @@ use PatternSeek\ComponentView\ViewState\ViewState;
 use Puli\Repository\Api\ResourceRepository;
 use Puli\TwigExtension\PuliExtension;
 use Puli\TwigExtension\PuliTemplateLoader;
-use Twig_Autoloader;
-use Twig_Environment;
-use Twig_Loader_String;
-use Twig_LoaderInterface;
+use Twig\Environment;
+use Twig\Loader\ArrayLoader;
+use Twig\Loader\ChainLoader;
+use Twig\LoaderInterface;
 
 /**
  * Class TwigTemplate
@@ -28,23 +28,23 @@ class TwigTemplate extends AbstractTemplate
 {
 
     /**
-     * @var Twig_Environment
+     * @var Environment
      */
-    protected $twig;
+    protected Environment $twig;
     /**
-     * @var string A Twig template path
+     * @var ?string A Twig template path
      */
-    protected $templatePath;
+    protected ?string $templatePath;
 
     /**
-     * @var string A Twig template already loaded as a string
+     * @var string|null A Twig template already loaded as a string
      */
-    protected $templateString;
+    protected ?string $templateString;
 
     /**
-     * @var ResourceRepository
+     * @var ResourceRepository|null
      */
-    protected $repo;
+    protected ?ResourceRepository $repo;
 
     /**
      * @param AbstractViewComponent $component
@@ -64,7 +64,6 @@ class TwigTemplate extends AbstractTemplate
         // Optional Puli repo
         $this->repo = $repo;
 
-        Twig_Autoloader::register();
         $this->initTwig( $this->getLoader() );
     }
 
@@ -73,15 +72,18 @@ class TwigTemplate extends AbstractTemplate
      * @param array $props
      * @return Response
      */
-    protected function doRender( ViewState $state, array $props = [] )
+    protected function doRender( ViewState $state, array $props = [] ): Response
     {
         // If puli plugin is available then add it.
         if (class_exists( "Puli\\TwigExtension\\PuliExtension" ) && null !== $this->repo) {
             $this->twig->addExtension( new PuliExtension( $this->repo ) );
         }
-
+        if( $this->templateString ){
+            $template = $this->twig->createTemplate($this->templateString);
+        }
+        
         $rendered = $this->twig->render(
-            $this->templateString?$this->templateString:$this->templatePath,
+            $template??$this->templatePath,
             [
                 'state' => $state,
                 'props' => $props,
@@ -95,13 +97,13 @@ class TwigTemplate extends AbstractTemplate
     /**
      * @return Twig_LoaderInterface
      */
-    protected function getLoader()
+    protected function getLoader(): ChainLoader|ArrayLoader|LoaderInterface
     {
 
         if (class_exists( "Puli\\TwigExtension\\PuliExtension" ) && null !== $this->repo) {
-            $loader = new \Twig_Loader_Chain( [ new PuliTemplateLoader( $this->repo ), new Twig_Loader_String() ] );
+            $loader = new ChainLoader( [ new PuliTemplateLoader( $this->repo ), new Twig_Loader_String() ] );
         }else {
-            $loader = new Twig_Loader_String();
+            $loader = new ArrayLoader();
         }
         return $loader;
     }
@@ -115,7 +117,7 @@ class TwigTemplate extends AbstractTemplate
         if (defined( "TWIG_CACHE_DIR" )) {
             $config[ 'cache' ] = TWIG_CACHE_DIR;
         }
-        $this->twig = new Twig_Environment( $loader, $config );
+        $this->twig = new Environment( $loader, $config );
     }
 
 }

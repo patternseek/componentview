@@ -10,6 +10,8 @@
 
 namespace PatternSeek\ComponentView;
 
+use Exception;
+use JetBrains\PhpStorm\Pure;
 use PatternSeek\ComponentView\Template\AbstractTemplate;
 use PatternSeek\ComponentView\ViewState\ViewState;
 use PatternSeek\DependencyInjector\DependencyInjector;
@@ -23,59 +25,42 @@ use Psr\Log\LogLevel;
 abstract class AbstractViewComponent implements \JsonSerializable
 {
 
-    /**
-     * @var ExecHelper
-     */
-    public $exec;
+    public ExecHelper $exec;
     /**
      * Message to display when rendering component. Won't be serialised to will only be displayed once.
-     * @var string
      */
-    public $flashMessage;
+    public string $flashMessage;
     /**
      * Error to display when rendering component. Won't be serialised to will only be displayed once.
-     * @var string
      */
-    public $flashError;
+    public string $flashError;
     /**
      * If we have a parent in $parent, $handle is the parent's handle/identifier for us
-     * @var string
      */
-    public $handle;
+    public ?string $handle;
     /**
-     * @var ViewState An object containing state elements
+     * An object containing state elements
      */
-    protected $state;
-    /**
-     * @var AbstractViewComponent
-     */
-    protected $parent;
+    protected ViewState $state;
+
+    protected ?AbstractViewComponent $parent;
     /**
      * @var AbstractViewComponent[]
      */
-    public $childComponents = [ ];
+    public array $childComponents = [ ];
 
-    /**
-     * @var AbstractTemplate
-     */
-    protected $template;
+    protected AbstractTemplate $template;
 
-    /**
-     * @var LoggerInterface
-     */
-    protected $logger;
+    protected LoggerInterface $logger;
 
-    /**
-     * @var array
-     */
-    protected $props;
+    protected array $props;
 
     /**
      * If set the render() will skip any processing and immediately return this response
      *
      * @var Response
      */
-    private $forceResponse;
+    private Response $forceResponse;
 
     /**
      * @param null $handle
@@ -112,8 +97,9 @@ abstract class AbstractViewComponent implements \JsonSerializable
     /**
      * @param string $message
      * @param string $level A constant from LogLevel
+     * @param array|atring $context
      */
-    protected function log( $message, $level, $context = [] ){
+    protected function log( string $message, string $level, array|string $context = [] ){
         if( isset( $this->logger ) ){
             $class = get_class( $this );
             $message = "[{$class}] {$message}";
@@ -127,9 +113,9 @@ abstract class AbstractViewComponent implements \JsonSerializable
     /**
      * User this to serialise ViewComponents as extra steps may be added later.
      * Note that we have implemented __sleep() so not all members are serialised.
-     * @return string
      */
-    public function dehydrate(){
+    public function dehydrate(): string
+    {
         $ser = serialize($this);
         // We have to unserialise the serialised object here because it's stripped down to only the required properties by __sleep()
         $this->log( "Dehydrating", LogLevel::DEBUG, [unserialize($ser)] );
@@ -139,12 +125,9 @@ abstract class AbstractViewComponent implements \JsonSerializable
     /**
      * Use this to unserialise ViewComponents
      * Note that we have implemented __sleep() so not all members are serialised.
-     * @param $serialised
-     * @param ExecHelper $execHelper
-     * @param LoggerInterface $logger
-     * @return AbstractViewComponent
      */
-    public static function rehydrate( $serialised, ExecHelper $execHelper, LoggerInterface $logger = null ){
+    public static function rehydrate( $serialised, ExecHelper $execHelper, LoggerInterface $logger = null ): AbstractViewComponent
+    {
         /** @var AbstractViewComponent $view */
         $view = unserialize( $serialised );
         if( null !== $logger ){
@@ -173,7 +156,8 @@ abstract class AbstractViewComponent implements \JsonSerializable
      * Implement JsonSerializable interface, for logging mainly
      * @return mixed
      */
-    public function jsonSerialize() {
+    #[Pure] public function jsonSerialize(): mixed
+    {
         $ret = [];
         // Return the same fields as __sleep() specifies for serialize()
         foreach ( $this->__sleep() as $member ){
@@ -190,16 +174,16 @@ abstract class AbstractViewComponent implements \JsonSerializable
      * Entry point for rendering a component tree. Call updateView() first.
      * @param string|null $execMethodName An optional method on this or a subcomponent to execute before rendering
      * @param array|null $execArgs
-     * @throws \Exception
+     * @throws Exception
      * @return Response
      */
-    public function render( $execMethodName = null, array $execArgs = null )
+    public function render( $execMethodName = null, array $execArgs = null ): Response
     {
         $this->state->validate();
 
         // updateState() on any component can call $this->getRootComponent()->forceResponse()
         // to force a particular response, usually a redirect.
-        if (null !== $this->forceResponse) {
+        if (isset($this->forceResponse)) {
             return $this->forceResponse;
         }
         
@@ -214,7 +198,7 @@ abstract class AbstractViewComponent implements \JsonSerializable
             $this->log( "Rendering without exec", LogLevel::DEBUG );
             $out = $this->template->render( $this->state, $this->props );
             if (!( $out instanceof Response )) {
-                throw new \Exception( get_class( $this->template ) . " returned invalid response. Should have been an instance of PatternSeek\ComponentView\Response" );
+                throw new Exception( get_class( $this->template ) . " returned invalid response. Should have been an instance of PatternSeek\ComponentView\Response" );
             }
         }
         return $out;
@@ -225,10 +209,10 @@ abstract class AbstractViewComponent implements \JsonSerializable
      * Called first on a top level component which then passes the call down to the appropriate sub-component (or executes on itself if appropriate).
      * @param array|string $methodName A methodname in the format subComponent.anotherSubComponent.methodName. Either dotted string as described, or parts in an array. The top level page component shouldn't be included
      * @param array $args
-     * @throws \Exception
+     * @throws Exception
      * @return Response
      */
-    protected function execMethod( $methodName, array $args = null )
+    protected function execMethod( $methodName, array $args = null ): Response
     {
         if (!is_array( $methodName )) {
             $methodName = explode( '.', $methodName );
@@ -242,47 +226,34 @@ abstract class AbstractViewComponent implements \JsonSerializable
             if ($child instanceof AbstractViewComponent) {
                 $out = $child->execMethod( $methodName, $args );
             }else {
-                throw new \Exception( implode( ".", $methodName ) . " is not a valid method." );
+                throw new Exception( implode( ".", $methodName ) . " is not a valid method." );
             }
         }
         if (!( $out instanceof Response )) {
             $nameStr = is_array( $methodName )?implode( ".", $methodName ):$methodName;
-            throw new \Exception( $nameStr . " returned invalid response. Should have been an instance of PatternSeek\ComponentView\Response" );
+            throw new Exception( $nameStr . " returned invalid response. Should have been an instance of PatternSeek\ComponentView\Response" );
         }
         return $out;
     }
 
-    /**
-     * @param $execMethod
-     * @return string
-     */
-    public function getExecPath( $execMethod )
+    public function getExecPath( $execMethod ): string
     {
         $path = $this->getPath();
         return ( $path === null?$execMethod:$path . '.' . $execMethod );
     }
 
-    /**
-     * @return AbstractViewComponent
-     */
-    public function getParent()
+    public function getParent(): ?AbstractViewComponent
     {
         return $this->parent;
     }
 
 
-    /**
-     * @param $string
-     */
     protected function setFlashMessage( $string )
     {
         $this->flashMessage = $string;
     }
 
-    /**
-     * @param $string
-     */
-    protected function setFlashError( $string )
+    protected function setFlashError( string $string )
     {
         $this->flashError = $string;
     }
@@ -292,7 +263,7 @@ abstract class AbstractViewComponent implements \JsonSerializable
      *
      * @return AbstractViewComponent
      */
-    protected function getRootComponent()
+    protected function getRootComponent(): ?AbstractViewComponent
     {
         $cur = $this;
         while ($cur->parent !== null) {
@@ -319,12 +290,13 @@ abstract class AbstractViewComponent implements \JsonSerializable
      * Return the this object's path in the current component hierarchy
      * @return string
      */
-    protected function getPath()
+    protected function getPath(): ?string
     {
         if (null === $this->parent) {
             return null;
         }
-        if (null !== ( $pPath = $this->parent->getPath() )) {
+        $pPath = $this->parent->getPath();
+        if (null !== $pPath) {
             return $pPath . '.' . $this->handle;
         }else {
             return $this->handle;
@@ -337,15 +309,14 @@ abstract class AbstractViewComponent implements \JsonSerializable
      * @param string $handle
      * @param string $type
      * @param array $props
-     * @return AbstractViewComponent
-     * @throws \Exception
+     * @throws Exception
      */
     protected function addOrUpdateChild( $handle, $type, array $props = [ ] )
     {
         $this->log( "Adding/updating child '{$handle}' of type {$type}", LogLevel::DEBUG );
         if (!isset( $this->childComponents[ $handle ] )) {
             if( ! class_exists( $type ) ){
-                throw new \Exception( "Class '{$type}' for sub-component  does not exist." );
+                throw new Exception( "Class '{$type}' for sub-component  does not exist." );
             }
             $child = new $type( $handle, $this, $this->exec, $this->logger );
             $this->childComponents[ $handle ] = $child;
@@ -361,15 +332,15 @@ abstract class AbstractViewComponent implements \JsonSerializable
      * Render a child component.
      *
      * @param $handle
-     * @return Response
-     * @throws \Exception
+     * @return string
+     * @throws Exception
      */
-    public function renderChild( $handle )
+    public function renderChild( $handle ): string
     {
         if (!$this->childComponents[ $handle ]) {
             $message = "Attempted to render nonexistent child component with handle '{$handle}'";
             $this->log( $message, LogLevel::CRITICAL );
-            throw new \Exception( $message );
+            throw new Exception( $message );
         }
         return $this->childComponents[ $handle ]->render()->content;
     }
@@ -415,7 +386,7 @@ abstract class AbstractViewComponent implements \JsonSerializable
      *      ]
      * @param array $inputSpec See above
      * @param array $inputs
-     * @throws \Exception
+     * @throws Exception
      */
     protected function testInputs( array $inputSpec, array &$inputs )
     {
@@ -431,7 +402,7 @@ abstract class AbstractViewComponent implements \JsonSerializable
                     if( $this->parent !== null ){
                         $parentText = " (parent component is ".get_class($this->parent).")";
                     }
-                    throw new \Exception( $fieldName . " is a required field for " . get_class( $this )."::{$calledFunc}() called from {$callerClass}::{$callerFunc}(){$parentText}" );
+                    throw new Exception( $fieldName . " is a required field for " . get_class( $this )."::{$calledFunc}() called from {$callerClass}::{$callerFunc}(){$parentText}" );
                 }
             }
             // Set default is unset
@@ -448,39 +419,18 @@ abstract class AbstractViewComponent implements \JsonSerializable
             // Specific type required
             // Null is allowed
             if (!is_null( $input )) {
-                switch ($requiredType) {
-                    case "boolean":
-                    case "bool":
-                    $failed = !is_bool( $input );
-                        break;
-                    case "integer":
-                    case "int":
-                    $failed = !is_int( $input+0 );
-                        break;
-                    case "double":
-                        $failed = !is_double( $input+0 );
-                        break;
-                    case "float":
-                        $failed = !is_float( $input+0 );
-                        break;
-                    case "string":
-                        $failed = !is_string( $input );
-                        break;
-                    case "array":
-                        $failed = !is_array( $input );
-                        break;
-                    case "object":
-                        $failed = !is_object( $input );
-                        break;
-                    case "resource":
-                        $failed = !is_resource( $input );
-                        break;
-                    case "callable":
-                        $failed = !is_callable( $input );
-                        break;
-                    default:
-                        $failed = !( $input instanceof $requiredType );
-                }
+                $failed = match ( $requiredType ) {
+                    "string" => !is_string( $input ),
+                    "array" => !is_array( $input ),
+                    "object" => !is_object( $input ),
+                    "resource" => !is_resource( $input ),
+                    "callable" => !is_callable( $input ),
+                    "boolean", "bool" => !is_bool( $input ),
+                    "integer", "int" => !is_int( $input ),
+                    "double" => !is_double( $input ),
+                    "float" => !is_float( $input ),
+                    default => !( $input instanceof $requiredType ),
+                };
                 if ($failed) {
                     $calledFunc = debug_backtrace()[1]['function'];
                     $callerFunc = debug_backtrace()[2]['function'];
@@ -489,7 +439,7 @@ abstract class AbstractViewComponent implements \JsonSerializable
                     if( $this->parent !== null ){
                         $parentText = " (parent component is ".get_class($this->parent).")";
                     }
-                    throw new \Exception( $fieldName . " should be of type " . $requiredType . "in " . get_class( $this )."::{$calledFunc}() called from {$callerClass}::{$callerFunc}(){$parentText}" );
+                    throw new Exception( $fieldName . " should be of type " . $requiredType . "in " . get_class( $this )."::{$calledFunc}() called from {$callerClass}::{$callerFunc}(){$parentText}" );
                 }
             }
         }
@@ -497,10 +447,8 @@ abstract class AbstractViewComponent implements \JsonSerializable
 
     /**
      * Update the full component view tree.
-     *
-     * @var array $props
      */
-    public function updateView( $props )
+    public function updateView( array $props )
     {
         $this->updateProps( $props );
         $this->updateState();
@@ -511,7 +459,7 @@ abstract class AbstractViewComponent implements \JsonSerializable
      *
      * @var array $props
      */
-    protected function updateProps( $props )
+    protected function updateProps( array $props )
     {
         $this->log( "Storing new props: ", LogLevel::DEBUG,  var_export( $props, true ) );
         $this->props = $props;   
@@ -568,7 +516,8 @@ abstract class AbstractViewComponent implements \JsonSerializable
     /**
      * @return LoggerInterface
      */
-    protected function getLogger(){
+    protected function getLogger(): LoggerInterface
+    {
         return $this->logger;
     }
 }

@@ -11,8 +11,8 @@
         }
     ],
     "require": {
-        "php": ">=7.3",
-        "twig/twig": "1.*",
+        "php": ">=8.1",
+        "twig/twig": "3.*",
         "patternseek/structclass": "1.*",
         "patternseek/dependencyinjector": "0.1.*",
         "psr/log": "^1.0"
